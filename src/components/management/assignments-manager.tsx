@@ -24,7 +24,7 @@ export function AssignmentsManager({ basePath, courses, localAssignments }: Prop
           <p className="text-sm text-[var(--muted)]">Belum ada assignment.</p>
         </div>
       ) : (
-        localAssignments.map((a: any) => (
+        localAssignments.map((a) => (
           <div key={a.id} className="rounded-[32px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
             <div className="flex items-start justify-between gap-4">
               <div>

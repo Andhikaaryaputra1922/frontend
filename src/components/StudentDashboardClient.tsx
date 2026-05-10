@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -281,16 +282,68 @@ function SettingsPage({ student }: { student: DashboardData["student"] }) {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default function StudentDashboardClient() {
+  const router = useRouter();
   const [data, setData]           = useState<DashboardData | null>(null);
   const [loading, setLoading]     = useState(true);
   const [activeNav, setActiveNav] = useState<NavKey>("overview");
   const [collapsed, setCollapsed] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
 
   useEffect(() => {
-    // TODO: ganti dengan fetch API asli, misal:
-    // fetch("/api/student/dashboard").then(r => r.json()).then(setData)
-    const t = setTimeout(() => { setData(MOCK_DATA); setLoading(false); }, 600);
-    return () => clearTimeout(t);
+    async function loadData() {
+      try {
+        const [enrollRes, assignRes, quizRes, certRes, meRes] = await Promise.all([
+          fetch("/api/enrollments", { credentials: "include" }),
+          fetch("/api/assignments", { credentials: "include" }),
+          fetch("/api/quizzes", { credentials: "include" }),
+          fetch("/api/certificates", { credentials: "include" }),
+          fetch("/api/auth/me", { credentials: "include" }),
+        ]);
+
+        const enrollData = enrollRes.ok ? await enrollRes.json() : { enrollments: [] };
+        const assignData = assignRes.ok ? await assignRes.json() : { assignments: [] };
+        const quizData = quizRes.ok ? await quizRes.json() : { quizzes: [] };
+        const certData = certRes.ok ? await certRes.json() : { certificates: [] };
+        const meData = meRes.ok ? await meRes.json() : { user: { name: "Siswa", email: "" } };
+
+        setData({
+          student: { name: meData.user?.name ?? "Siswa", email: meData.user?.email ?? "" },
+          enrollments: (enrollData.enrollments ?? []).map((e: any) => ({
+            id: e.id,
+            courseName: e.course?.title ?? "",
+            progress: Math.round(e.progress ?? 0),
+            instructor: e.course?.teacher?.name ?? "Pengajar",
+          })),
+          assignments: (assignData.assignments ?? []).map((a: any) => ({
+            id: a.id,
+            title: a.title,
+            courseName: a.course?.title ?? "",
+            dueDate: a.dueDate,
+            status: "pending",
+          })),
+          quizzes: (quizData.quizzes ?? []).map((q: any) => ({
+            id: q.id,
+            title: q.title,
+            courseName: q.course?.title ?? "",
+            dueDate: "",
+            status: "upcoming",
+            totalQuestions: q.questions?.length ?? 0,
+          })),
+          certificates: (certData.certificates ?? []).map((c: any) => ({
+            id: c.id,
+            courseName: c.course?.title ?? "",
+            issuedAt: c.issuedAt,
+            downloadUrl: c.pdfUrl,
+          })),
+        });
+      } catch (err) {
+        console.error("Failed to load dashboard data:", err);
+        setData(MOCK_DATA);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
   }, []);
 
   if (loading) {
@@ -380,10 +433,32 @@ export default function StudentDashboardClient() {
         <div className="px-2 py-3 border-t border-slate-100">
           <button
             title={collapsed ? "Keluar" : undefined}
+            onClick={async () => {
+              if (logoutLoading) return;
+              if (!confirm("Yakin ingin keluar?")) return;
+              setLogoutLoading(true);
+              try {
+                const res = await fetch("/api/auth/logout", {
+                  method: "POST",
+                  credentials: "include",
+                });
+                if (res.ok) {
+                  router.push("/login");
+                  router.refresh();
+                } else {
+                  alert("Logout gagal. Silakan coba lagi.");
+                }
+              } catch {
+                alert("Logout gagal. Silakan coba lagi.");
+              } finally {
+                setLogoutLoading(false);
+              }
+            }}
+            disabled={logoutLoading}
             className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-rose-500 hover:bg-rose-50 transition-colors ${collapsed ? "justify-center" : ""}`}
           >
             <span className="text-lg flex-shrink-0">🚪</span>
-            {!collapsed && <span>Keluar</span>}
+            {!collapsed && <span>{logoutLoading ? "Keluar..." : "Keluar"}</span>}
           </button>
         </div>
       </aside>

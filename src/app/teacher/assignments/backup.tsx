@@ -63,12 +63,26 @@ export function AssignmentsClient({
   const [showSuccessToast, setShowSuccessToast] =
     useState(false);
 
-  const [newAssignment, setNewAssignment] = useState({
+  const defaultNewAssignment = {
     title: "",
     description: "",
     dueDate: "",
     maxScore: 100,
     courseId: "",
+  };
+
+  // Hindari setState sinkron di useEffect (kena rule react-hooks/set-state-in-effect).
+  // Ambil draft sekali via lazy initializer.
+  const [newAssignment, setNewAssignment] = useState(() => {
+    if (typeof window === "undefined") return defaultNewAssignment;
+    const saved = localStorage.getItem("assignmentDraft");
+    if (!saved) return defaultNewAssignment;
+    try {
+      const parsed = JSON.parse(saved) as Partial<typeof defaultNewAssignment>;
+      return { ...defaultNewAssignment, ...parsed };
+    } catch {
+      return defaultNewAssignment;
+    }
   });
 
   /*
@@ -76,15 +90,6 @@ export function AssignmentsClient({
   AUTO SAVE DRAFT
   =========================
   */
-
-  useEffect(() => {
-    const saved =
-      localStorage.getItem("assignmentDraft");
-
-    if (saved) {
-      setNewAssignment(JSON.parse(saved));
-    }
-  }, []);
 
   useEffect(() => {
     localStorage.setItem(
