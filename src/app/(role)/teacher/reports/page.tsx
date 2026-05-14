@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { getAuthCookieName, verifyUserJwt } from "@/lib/auth/jwt";
-import LogoutButton from "@/components/LogoutButton";
-import BackButton from "@/components/BackButton";
+import { getAuthCookieName, verifyUserJwt } from "@/shared/lib/auth/jwt";
+import LogoutButton from "@/shared/components/ui/LogoutButton";
+import BackButton from "@/shared/components/ui/BackButton";
 
 export default async function TeacherPage() {
   const cookieStore = await cookies();

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { PremiumModal, Toast } from "@/components/ui/PremiumFeedback";
+import { PremiumModal, Toast } from "@/shared/components/ui/PremiumFeedback";
 import { useRouter } from "next/navigation";
 
 /* ── Types ──────────────────────────────────────────── */
@@ -83,7 +83,11 @@ export default function AdminPackagesPage() {
       const res = await fetch("/api/admin/packages", { credentials: "include" });
       if (!res.ok) return;
       const data = await res.json();
-      setPackages(data.packages ?? []);
+      const mapped = (data.packages ?? []).map((p: any) => ({
+        ...p,
+        price: Number(p.price)
+      }));
+      setPackages(mapped);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   }, []);

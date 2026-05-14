@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { PremiumModal, Toast } from "@/components/ui/PremiumFeedback";
+import { PremiumModal, Toast } from "@/shared/components/ui/PremiumFeedback";
 
 interface ActivePackage {
   name: string;

@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { getAuthCookieName, verifyUserJwt } from "@/lib/auth/jwt";
-import { getRequestOrigin } from "@/lib/origin";
-import { CompleteEnrollmentButton } from "@/components/complete-enrollment-button";
-import BackButton from "@/components/BackButton";
+import { getAuthCookieName, verifyUserJwt } from "@/shared/lib/auth/jwt";
+import { getRequestOrigin } from "@/shared/lib/origin";
+import { CompleteEnrollmentButton } from "@/features/packages/components/complete-enrollment-button";
+import BackButton from "@/shared/components/ui/BackButton";
 
 type Enrollment = {
   id: string;
@@ -78,9 +78,19 @@ export default async function StudentEnrollmentsPage() {
                         Status: {e.status} • Progress: {Math.round(e.progress)}%
                       </p>
                     </div>
-                    {role === "STUDENT" && e.status !== "COMPLETED" ? (
-                      <CompleteEnrollmentButton enrollmentId={e.id} />
-                    ) : null}
+                    {role === "STUDENT" && (
+                      <div className="flex flex-col sm:flex-row gap-3">
+                         <Link 
+                            href={`/student/courses/${e.course.id}/learn/start`}
+                            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-[#8B0000] text-white text-[10px] font-black uppercase tracking-widest hover:bg-red-800 transition-all shadow-lg shadow-red-900/10"
+                         >
+                            Mulai Belajar
+                         </Link>
+                         {e.status !== "COMPLETED" && (
+                            <CompleteEnrollmentButton enrollmentId={e.id} />
+                         )}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))

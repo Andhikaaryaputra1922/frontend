@@ -8,7 +8,7 @@ import {
   Shield, Menu, X, MessageCircle, Camera,
   Book, Monitor, Calendar, Check
 } from "lucide-react";
-import { IslamicPanel, IslamicCard } from "@/components/ui/IslamicPanel";
+import { IslamicPanel, IslamicCard } from "@/shared/components/ui/IslamicPanel";
 
 // Premium Hero Image generated (User needs to move this to public/hero.png)
 const HERO_IMAGE = "/hero.png";

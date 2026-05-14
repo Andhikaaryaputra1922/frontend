@@ -6,9 +6,9 @@ import {
   User, Mail, Phone, Lock, Moon, Sun, Monitor, 
   Camera, LogOut, ChevronRight, ShieldCheck, CreditCard 
 } from "lucide-react";
-import { useTheme } from "@/components/theme-provider";
-import { PremiumModal, Toast } from "@/components/ui/PremiumFeedback";
-import ImageCropperModal from "@/components/ui/ImageCropperModal";
+import { useTheme } from "@/shared/components/ui/theme-provider";
+import { PremiumModal, Toast } from "@/shared/components/ui/PremiumFeedback";
+import ImageCropperModal from "@/shared/components/ui/ImageCropperModal";
 
 interface UserProfile {
   id: string;

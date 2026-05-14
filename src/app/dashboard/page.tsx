@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { getAuthCookieName, verifyUserJwt } from "@/lib/auth/jwt";
+import { getAuthCookieName, verifyUserJwt } from "@/shared/lib/auth/jwt";
 import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {

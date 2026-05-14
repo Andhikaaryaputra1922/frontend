@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
-import { getAuthCookieName, verifyUserJwt } from "@/lib/auth/jwt";
-import BackButton from "@/components/BackButton";
+import { getAuthCookieName, verifyUserJwt } from "@/shared/lib/auth/jwt";
+import BackButton from "@/shared/components/ui/BackButton";
 import Link from "next/link";
 import { MaterialsClient } from "./materials-client";
 
@@ -11,10 +11,9 @@ type Lesson = {
   description: string | null;
   orderNumber: number;
   type: string;
-  contentUrl: string | null;
-  isDownloadable: boolean;
+  attachmentUrl: string | null;
+  videoUrl: string | null;
   createdAt: string;
-  courseId: string;
 };
 
 async function getCourses(token: string): Promise<Course[]> {
@@ -28,13 +27,38 @@ async function getCourses(token: string): Promise<Course[]> {
 }
 
 async function getLessons(courseId: string, token: string): Promise<Lesson[]> {
-  const response = await fetch(`http://localhost:4000/api/courses/${courseId}/lessons`, {
+  const url = `http://localhost:4000/api/courses/${courseId}/chapters`;
+  const response = await fetch(url, {
     cache: "no-store",
     headers: { cookie: `${getAuthCookieName()}=${token}` },
   });
-  if (!response.ok) return [];
-  const data = (await response.json()) as { lessons: Lesson[] };
-  return data.lessons ?? [];
+  
+  if (!response.ok) {
+    console.error(`[getLessons] Failed to fetch chapters for ${courseId}: ${response.status} ${response.statusText}`);
+    return [];
+  }
+  
+  const data = (await response.json()) as { chapters: any[] };
+  console.log(`[getLessons] Fetched ${data.chapters?.length || 0} chapters for course ${courseId}`);
+  
+  const allLessons: Lesson[] = [];
+  data.chapters?.forEach((ch) => {
+    ch.lessons?.forEach((ls: any) => {
+      allLessons.push({
+        id: ls.id,
+        title: ls.title,
+        description: ls.description,
+        orderNumber: ls.orderNumber,
+        type: ls.type,
+        attachmentUrl: ls.attachmentUrl,
+        videoUrl: ls.videoUrl,
+        createdAt: ls.createdAt,
+      } as any);
+    });
+  });
+  
+  console.log(`[getLessons] Total flattened lessons for ${courseId}: ${allLessons.length}`);
+  return allLessons;
 }
 
 export default async function MaterialsPage() {
@@ -64,7 +88,7 @@ export default async function MaterialsPage() {
               Manajemen Materi
             </h1>
             <p className="mt-2 text-sm text-[var(--muted)]">
-              Upload rekaman dan materi per kelas.
+              Upload rekaman dan materi per kelas ke dalam bab kurikulum.
             </p>
           </div>
           <div className="flex items-center gap-3">

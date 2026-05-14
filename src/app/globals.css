@@ -53,7 +53,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter), var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-plus-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -75,10 +76,15 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter), var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  font-family: var(--font-plus-jakarta), ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-outfit), sans-serif;
+  letter-spacing: -0.03em;
 }
 
 /* ─── Scrollbar ──────────────────────────────────────── */

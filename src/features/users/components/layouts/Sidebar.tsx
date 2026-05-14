@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { LogOut, LayoutDashboard, User, Settings } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { PremiumModal } from "@/components/ui/PremiumFeedback";
+import { PremiumModal } from "@/shared/components/ui/PremiumFeedback";
 
 export function Sidebar() {
   const router = useRouter();

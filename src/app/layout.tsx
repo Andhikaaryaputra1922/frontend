@@ -1,26 +1,26 @@
-import { Geist, Geist_Mono } from "next/font/google";
-import { Inter } from "next/font/google";
+import { Outfit, Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
 import Script from "next/script";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "@/shared/components/ui/theme-provider";
 import { Toaster } from "sonner";
 
 import "./globals.css";
 
 /*
 ========================================
-FONT
+FONT SYSTEM (PREMIUM PAIRING)
 ========================================
 */
 
-const inter = Inter({
-  variable: "--font-inter",
+const outfit = Outfit({
+  variable: "--font-outfit",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
 });
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-plus-jakarta",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 const geistMono = Geist_Mono({
@@ -43,8 +43,8 @@ export default function RootLayout({
     <html
       lang="id"
       className={`
-        ${inter.variable}
-        ${geistSans.variable}
+        ${outfit.variable}
+        ${plusJakartaSans.variable}
         ${geistMono.variable}
         h-full
         antialiased
@@ -52,7 +52,11 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-[var(--base)] text-[var(--text)]">
-        <Script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY} strategy="beforeInteractive" />
+        <Script 
+          src="https://app.sandbox.midtrans.com/snap/snap.js" 
+          data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY} 
+          strategy="afterInteractive" 
+        />
 
         <ThemeProvider>
 

@@ -1,9 +1,9 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { getAuthCookieName } from "@/lib/auth/jwt";
-import { getRequestOrigin } from "@/lib/origin";
-import BackButton from "@/components/BackButton";
+import { getAuthCookieName } from "@/shared/lib/auth/jwt";
+import { getRequestOrigin } from "@/shared/lib/origin";
+import BackButton from "@/shared/components/ui/BackButton";
 
 type Assignment = {
   id: string;

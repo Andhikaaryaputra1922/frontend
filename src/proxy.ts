@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getAuthCookieName } from "@/lib/auth/jwt";
+import { getAuthCookieName } from "@/shared/lib/auth/jwt";
 
 function parseJwtPayload(token: string) {
   try {
@@ -19,7 +19,10 @@ export function proxy(req: NextRequest) {
   // Sudah login, coba akses /login atau /
   if (token && (pathname === "/login" || pathname === "/")) {
     const payload = parseJwtPayload(token);
-    if (payload?.role === "TEACHER" || payload?.role === "ADMIN") {
+    if (payload?.role === "ADMIN") {
+      return NextResponse.redirect(new URL("/admin", req.url));
+    }
+    if (payload?.role === "TEACHER") {
       return NextResponse.redirect(new URL("/teacher", req.url));
     }
     return NextResponse.redirect(new URL("/student", req.url));
@@ -45,14 +48,19 @@ export function proxy(req: NextRequest) {
       return res;
     }
 
-    // Siswa coba akses /teacher
-    if (pathname.startsWith("/teacher") && payload.role === "STUDENT") {
+    // Siswa coba akses /teacher atau /admin
+    if ((pathname.startsWith("/teacher") || pathname.startsWith("/admin")) && payload.role === "STUDENT") {
       return NextResponse.redirect(new URL("/student", req.url));
     }
 
-    // Teacher coba akses /student
-    if (pathname.startsWith("/student") && (payload.role === "TEACHER" || payload.role === "ADMIN")) {
+    // Teacher coba akses /student atau /admin
+    if ((pathname.startsWith("/student") || pathname.startsWith("/admin")) && payload.role === "TEACHER") {
       return NextResponse.redirect(new URL("/teacher", req.url));
+    }
+
+    // Admin coba akses /student
+    if (pathname.startsWith("/student") && payload.role === "ADMIN") {
+      return NextResponse.redirect(new URL("/admin", req.url));
     }
   }
 

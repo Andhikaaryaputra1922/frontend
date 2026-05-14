@@ -7,7 +7,7 @@ import {
   LayoutDashboard, BookOpen, ClipboardList, HelpCircle,
   PlaySquare, Award, Settings, LogOut, CheckCircle, Clock
 } from "lucide-react";
-import { IslamicPanel, IslamicCard } from "@/components/ui/IslamicPanel";
+import { IslamicPanel, IslamicCard } from "@/shared/components/ui/IslamicPanel";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -71,29 +71,13 @@ interface DashboardData {
   };
 }
 
-// ─── Mock Data ────────────────────────────────────────────────────────────────
-
+// No Mock Data anymore
 const MOCK_DATA: DashboardData = {
-  student: { name: "Ahmad Fauzi", email: "ahmad@example.com" },
-  assignments: [
-    { id: "1", title: "Essay: Sejarah Islam", courseName: "Sejarah Peradaban", dueDate: "2026-05-15", status: "pending" },
-    { id: "2", title: "Laporan Praktikum Kimia", courseName: "Kimia Dasar", dueDate: "2026-05-10", status: "submitted" },
-    { id: "3", title: "Analisis Puisi", courseName: "Bahasa Indonesia", dueDate: "2026-04-30", status: "graded", grade: 88 },
-  ],
-  certificates: [
-    { id: "1", courseName: "Matematika Dasar", issuedAt: "2026-03-20" },
-    { id: "2", courseName: "Pengantar Pemrograman", issuedAt: "2026-02-14" },
-  ],
-  enrollments: [
-    { id: "1", courseName: "Kimia Dasar", progress: 65, instructor: "Dr. Siti Rahayu" },
-    { id: "2", courseName: "Sejarah Peradaban", progress: 40, instructor: "Ustadz Hasan" },
-    { id: "3", courseName: "Bahasa Indonesia", progress: 90, instructor: "Bu Kartini" },
-    { id: "4", courseName: "Fisika Modern", progress: 20, instructor: "Prof. Budi" },
-  ],
-  quizzes: [
-    { id: "1", title: "Quiz Bab 3", courseName: "Kimia Dasar", dueDate: "2026-05-12", status: "upcoming", totalQuestions: 20 },
-    { id: "2", title: "Ulangan Harian", courseName: "Sejarah Peradaban", dueDate: "2026-05-08", status: "completed", score: 85, totalQuestions: 15 },
-  ],
+  student: { name: "Siswa", email: "" },
+  assignments: [],
+  certificates: [],
+  enrollments: [],
+  quizzes: [],
 };
 
 // ─── Nav Config ───────────────────────────────────────────────────────────────
@@ -205,14 +189,16 @@ function OverviewPage({ data }: { data: DashboardData }) {
       )}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((s) => (
-          <div key={s.label} className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex items-center gap-4">
-            <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-xl ${s.bg}`}>{s.icon}</div>
-            <div>
-              <p className={`text-2xl font-bold ${s.text}`}>{s.value}</p>
-              <p className="text-xs text-slate-500">{s.label}</p>
+        {stats.map((card) => (
+          <div key={card.label} className="group bg-white rounded-[40px] p-8 shadow-sm border border-white hover:shadow-2xl hover:-translate-y-2 hover:scale-[1.02] transition-all duration-500 ease-out">
+            <div className="flex items-center justify-between mb-6">
+               <div className="h-14 w-14 rounded-2xl bg-[#FAF9F6] flex items-center justify-center text-2xl group-hover:bg-[#1A2E44] group-hover:text-white transition-colors duration-500">
+                  {card.icon}
+               </div>
+               <span className="text-2xl font-black text-[#1A2E44] tracking-tight">{card.value}</span>
             </div>
-          </div>
+            <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{card.label}</p>
+         </div>
         ))}
       </div>
 
@@ -444,223 +430,196 @@ export default function StudentDashboardClient() {
   const activeEnrollments = data.enrollments.filter(e => e.progress < 100);
 
   return (
-    <div className="p-6 md:p-10">
-      <div className="max-w-6xl mx-auto">
-        {/* Header Section */}
-        <IslamicPanel variant="navy" className="mb-10 text-white overflow-hidden relative">
-          <div className="relative z-10 py-4">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="inline-block h-1 w-6 rounded-full bg-[#E5B54F]" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#E5B54F]">Selamat Datang</span>
+    <div className="min-h-screen bg-[#FAF9F6] p-10 lg:p-16">
+      <div className="max-w-7xl mx-auto">
+        
+        {/* ── Top Header ────────────────────────────────────────────────── */}
+         <header className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-16">
+            <div>
+               <h1 className="text-4xl md:text-6xl font-black text-[#1A2E44] tracking-tighter leading-none">
+                  SABTU <span className="text-[#E5B54F]">BAROKAH.</span>
+               </h1>
+               <p className="text-slate-400 font-bold mt-4 uppercase tracking-[0.3em] text-[10px]">Student Dashboard · Haneen Academy</p>
             </div>
-            <h1 className="text-3xl font-black tracking-tight md:text-5xl mb-2">
-              Ahlan wa Sahlan, {data.student.name.split(' ')[0]}! ✨
-            </h1>
-            <p className="text-sm text-white/70 font-medium italic">
-              {new Date().toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-            </p>
-          </div>
-          
-          {/* Decorative Arabic Motif (Optional SVG) */}
-          <div className="absolute top-0 right-0 opacity-10 pointer-events-none translate-x-1/4 -translate-y-1/4">
-             <svg width="300" height="300" viewBox="0 0 100 100" fill="currentColor"><path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z" /></svg>
-          </div>
-        </IslamicPanel>
-
-        {/* Banner Paket */}
-        {data.packageData && (
-          <div className="mb-12">
-            {data.packageData.activePackages.map((pkg) => {
-              const isExpiringSoon = pkg.daysRemaining !== null && pkg.daysRemaining <= 7;
-              return (
-                <div key={pkg.enrollmentId} 
-                  className={`rounded-[40px] border-2 p-8 flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl transition-all hover:-translate-y-1 duration-500 ${
-                    isExpiringSoon 
-                    ? 'border-amber-300 bg-gradient-to-br from-amber-50 via-white to-amber-50/30' 
-                    : 'border-[#E5B54F]/30 bg-gradient-to-br from-[#1A2E44] to-[#0F1C2E] text-white'
-                  }`}>
-                  <div className="flex items-center gap-6">
-                    <div className={`flex h-16 w-16 items-center justify-center rounded-3xl text-3xl shadow-xl ${
-                      isExpiringSoon ? 'bg-amber-400 text-white' : 'bg-[#E5B54F] text-[#1A2E44]'
-                    }`}>
-                      {isExpiringSoon ? <Clock size={32} /> : <Award size={32} />}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                         <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${
-                           isExpiringSoon ? 'bg-amber-100 text-amber-800' : 'bg-white/10 text-[#E5B54F]'
-                         }`}>Akses VIP Aktif</span>
-                      </div>
-                      <h3 className={`text-2xl font-black ${isExpiringSoon ? 'text-amber-900' : 'text-white'}`}>
-                        Paket {pkg.package.name}
-                      </h3>
-                      <p className={`text-sm mt-1 font-medium ${isExpiringSoon ? 'text-amber-700/80' : 'text-white/60'}`}>
-                        {pkg.expiresAt 
-                          ? `Berlaku hingga: ${new Date(pkg.expiresAt).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}`
-                          : 'Akses tanpa batas (Lifetime Access)'}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4 w-full md:w-auto">
-                    {pkg.daysRemaining !== null && (
-                      <div className={`px-6 py-3 rounded-2xl text-sm font-black uppercase tracking-widest shadow-xl ${
-                        isExpiringSoon ? 'bg-amber-500 text-white' : 'bg-[#E5B54F] text-[#1A2E44]'
-                      }`}>
-                        {pkg.daysRemaining} Hari Lagi
-                      </div>
-                    )}
-                    <Link href="/student/packages" className={`flex-1 md:flex-none text-center px-6 py-3 rounded-2xl text-sm font-bold transition-all ${
-                      isExpiringSoon ? 'bg-white text-amber-800 border-2 border-amber-200' : 'bg-white/10 text-white border border-white/20 hover:bg-white/20'
-                    }`}>
-                      Kelola Paket
-                    </Link>
-                  </div>
+            <div className="flex items-center gap-4 flex-1 max-w-xl">
+             <div className="relative flex-1">
+                <input 
+                  type="text" 
+                  placeholder="Cari materi, kuis, atau tugas..." 
+                  className="w-full bg-white border-none rounded-2xl py-3.5 pl-12 pr-4 shadow-sm text-sm focus:ring-2 focus:ring-[#E5B54F] transition-all"
+                />
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 </div>
-              );
-            })}
+             </div>
+             <button className="h-12 w-12 bg-white rounded-2xl flex items-center justify-center text-[#1A2E44] shadow-sm hover:bg-[#E5B54F] hover:text-white transition-all">
+                <Settings size={20} />
+             </button>
           </div>
-        )}
+        </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
-          {/* Main Content Column */}
-          <div className="lg:col-span-2 space-y-10">
+          {/* ── Main Content (Left) ────────────────────────────────────────── */}
+          <div className="lg:col-span-8 space-y-8">
             
-            {/* Kursus Aktif */}
-            <section>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xs font-black uppercase tracking-[0.15em] text-slate-400">Kursus Berjalan</h2>
-                <Link href="/student/enrollments" className="text-xs font-bold text-[#8B0000] hover:underline">Lihat Semua</Link>
-              </div>
-              <div className="grid gap-6">
-                {activeEnrollments.length > 0 ? activeEnrollments.slice(0, 3).map((e) => (
-                  <IslamicCard key={e.id} variant="white" className="p-6 transition-all group cursor-pointer" onClick={() => router.push(`/student/enrollments/${e.id}`)}>
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <p className="font-black text-slate-800 text-lg group-hover:text-[#1A2E44] transition-colors">{e.courseName}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                           <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center">
-                              <CheckCircle size={12} className="text-emerald-500" />
+            {/* 1. Profile Detail Card */}
+            <div className="bg-white rounded-[40px] p-8 md:p-10 shadow-sm border border-white flex flex-col md:flex-row gap-10 relative overflow-hidden">
+               {/* Decorative Background Element */}
+               <div className="absolute top-0 right-0 w-32 h-32 bg-[#FAF9F6] rounded-bl-[100px] -mr-10 -mt-10" />
+               
+               <div className="relative shrink-0">
+                  <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-[#F9F6EE] overflow-hidden shadow-xl">
+                     <img 
+                       src={data.student.email === "admin@haneen.id" ? "/admin-avatar.jpg" : "https://api.dicebear.com/7.x/avataaars/svg?seed=" + data.student.name} 
+                       alt={data.student.name}
+                       className="w-full h-100 object-cover bg-[#1A2E44]"
+                     />
+                  </div>
+                  <button className="absolute bottom-2 right-2 h-10 w-10 bg-white rounded-full shadow-lg flex items-center justify-center text-[#1A2E44] border border-slate-100 hover:scale-110 transition-transform">
+                     <Settings size={16} />
+                  </button>
+               </div>
+
+               <div className="flex-1">
+                     <div className="flex flex-wrap items-center gap-3 mb-3">
+                        <span className="bg-[#1A2E44] text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest">Premium Member</span>
+                        <span className="bg-[#E5B54F] text-[#1A2E44] text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest italic">Akselerasi UTBK</span>
+                     </div>
+                     <h2 className="text-4xl font-black text-[#1A2E44] tracking-tighter mb-2">{data.student.name}</h2>
+                     <p className="text-slate-400 font-bold text-sm tracking-wide">{data.student.email}</p>
+                     
+                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-sm mt-8">
+                        <div className="space-y-1">
+                           <p className="text-slate-400 font-bold text-[10px] uppercase tracking-wider">Tanggal Registrasi</p>
+                           <p className="text-[#1A2E44] font-bold">12 Januari 2026</p>
+                        </div>
+                        <div className="space-y-1">
+                           <p className="text-slate-400 font-bold text-[10px] uppercase tracking-wider">Negara, Kota</p>
+                           <p className="text-[#1A2E44] font-bold">Indonesia, Jakarta</p>
+                        </div>
+                     </div>
+               </div>
+            </div>
+
+            {/* 2. Course Timeline */}
+            <div className="bg-white rounded-[40px] p-8 md:p-10 shadow-sm border border-white">
+               <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-xl font-black text-[#1A2E44]">Kursus Saya</h3>
+                  <Link href="/student/enrollments" className="text-xs font-bold text-[#E5B54F] hover:underline">Lihat Semua</Link>
+               </div>
+
+               <div className="relative pl-8 space-y-6">
+                  {/* Vertical Line */}
+                  <div className="absolute left-3.5 top-2 bottom-2 w-0.5 bg-[#F0F2F9]" />
+                  
+                  {data.enrollments.length > 0 ? data.enrollments.map((e, idx) => {
+                    const colors = [
+                      "bg-indigo-50 border-indigo-100 text-indigo-700 shadow-indigo-100/50",
+                      "bg-rose-50 border-rose-100 text-rose-700 shadow-rose-100/50",
+                      "bg-emerald-50 border-emerald-100 text-emerald-700 shadow-emerald-100/50"
+                    ];
+                    const color = colors[idx % colors.length];
+                    
+                    return (
+                      <div key={e.id} className="relative flex items-center group">
+                        {/* Dot on Line */}
+                        <div className="absolute -left-[25px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-4 border-white bg-[#1A2E44] shadow-sm z-10" />
+                        
+                        <div className={`flex-1 flex flex-col md:flex-row items-center justify-between gap-4 p-6 rounded-3xl border transition-all duration-500 hover:scale-[1.02] ${color}`}>
+                           <div className="flex-1 min-w-0">
+                              <p className="text-xs font-black uppercase tracking-widest opacity-60 mb-1">{e.instructor}</p>
+                              <h4 className="text-lg font-black truncate">{e.courseName}</h4>
                            </div>
-                           <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">{e.instructor}</p>
+                           <div className="flex items-center gap-4 w-full md:w-auto shrink-0">
+                              <div className="text-right">
+                                 <p className="text-[10px] font-black uppercase opacity-60">Progres</p>
+                                 <p className="text-lg font-black">{e.progress}%</p>
+                              </div>
+                              <button className="h-10 w-10 rounded-xl bg-white/50 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-all shadow-sm">
+                                 <PlaySquare size={18} />
+                              </button>
+                           </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                         <span className="text-xl font-black text-[#1A2E44]">{e.progress}%</span>
-                         <p className="text-[10px] font-bold text-slate-400 uppercase">Selesai</p>
-                      </div>
+                    );
+                  }) : (
+                    <div className="p-10 text-center border-2 border-dashed border-slate-100 rounded-[30px]">
+                       <p className="text-slate-400 font-medium">Belum ada kursus yang aktif.</p>
                     </div>
-                    <div className="w-full bg-slate-100 rounded-full h-2 shadow-inner">
-                      <div className="h-2 rounded-full bg-gradient-to-r from-[#1A2E44] to-[#E5B54F] transition-all duration-1000 shadow-sm" style={{ width: `${e.progress}%` }} />
-                    </div>
-                  </IslamicCard>
-                )) : (
-                  <div className="rounded-2xl border border-dashed border-slate-200 p-8 text-center">
-                    <p className="text-sm text-slate-400">Belum ada kursus yang aktif.</p>
-                  </div>
-                )}
-              </div>
-            </section>
-
-            {/* Tugas Pending */}
-            <section>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xs font-black uppercase tracking-[0.15em] text-slate-400">Tugas & Deadline</h2>
-                <Link href="/student/assignments" className="text-xs font-bold text-[#8B0000] hover:underline">Lihat Semua</Link>
-              </div>
-              <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden divide-y divide-slate-50">
-                {pendingAssignments.length > 0 ? pendingAssignments.slice(0, 4).map((a) => (
-                  <Link key={a.id} href={`/student/assignments/${a.id}`}
-                    className="flex items-center justify-between px-6 py-5 hover:bg-red-50/30 transition-colors group">
-                    <div className="flex items-center gap-4">
-                      <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 font-bold text-lg shadow-inner">
-                        !
-                      </div>
-                      <div>
-                        <p className="font-bold text-slate-800 text-sm group-hover:text-[#8B0000] transition-colors">{a.title}</p>
-                        <p className="text-[11px] text-slate-400 mt-0.5">{a.courseName} · <span className="text-rose-500 font-semibold">{a.dueDate}</span></p>
-                      </div>
-                    </div>
-                    <StatusBadge status={a.status} />
-                  </Link>
-                )) : (
-                  <div className="p-10 text-center">
-                    <p className="text-sm text-slate-400">Semua tugas sudah dikerjakan! 🎉</p>
-                  </div>
-                )}
-              </div>
-            </section>
+                  )}
+               </div>
+            </div>
           </div>
 
-          {/* Sidebar Column */}
-          <div className="space-y-10">
+          {/* ── Widgets (Right) ───────────────────────────────────────────── */}
+          <div className="lg:col-span-4 space-y-8">
             
-            {/* Quick Stats */}
-            <section>
-              <h2 className="text-xs font-black uppercase tracking-[0.15em] text-slate-400 mb-4">Statistik</h2>
-              <div className="grid gap-4">
-                <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                    <BookOpen size={20} />
+            {/* 1. Payment Info Card */}
+            <div className="bg-white rounded-[35px] p-8 shadow-sm border border-white">
+               <h3 className="text-lg font-black text-[#1A2E44] mb-6">Pembayaran</h3>
+               <div className="space-y-4">
+                  <div className="bg-[#FAF9F6] rounded-2xl p-4 border border-slate-100">
+                     <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">Metode Utama</p>
+                     <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                           <div className="h-8 w-12 bg-white rounded border flex items-center justify-center font-black text-[10px]">VISA</div>
+                           <p className="text-sm font-bold text-[#1A2E44]">**** 4590</p>
+                        </div>
+                        <Settings size={14} className="text-slate-300" />
+                     </div>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2">
+                     {["visa", "mc", "gpay", "wu"].map(p => (
+                        <div key={p} className="h-10 bg-[#FAF9F6] rounded-xl flex items-center justify-center text-[8px] font-black uppercase text-slate-300 border border-transparent hover:border-[#E5B54F] transition-all">{p}</div>
+                     ))}
+                  </div>
+               </div>
+            </div>
+
+            {/* 2. Premium Subscription Card */}
+            <div className="bg-[#1A2E44] rounded-[35px] p-8 shadow-2xl relative overflow-hidden group">
+               {/* Background Bird Motif */}
+               <div className="absolute top-0 right-0 w-40 h-40 opacity-5 -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-700">
+                  <svg width="100%" height="100%" viewBox="0 0 100 100" fill="white"><path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z" /></svg>
+               </div>
+
+               <div className="relative z-10 space-y-6">
+                  <div className="h-12 w-12 bg-[#E5B54F] rounded-2xl flex items-center justify-center text-[#1A2E44] shadow-lg">
+                     <Award size={24} />
                   </div>
                   <div>
-                    <p className="text-lg font-black text-slate-800">{data.enrollments.length}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase">Total Kursus</p>
+                     <h3 className="text-xl font-black text-white leading-tight">Berlangganan<br/>Haneen Premium</h3>
+                     <p className="text-xs text-white/50 mt-2">Dapatkan akses eksklusif ke seluruh materi dan kuis intensif.</p>
                   </div>
-                </div>
-                <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                    <Award size={20} />
-                  </div>
-                  <div>
-                    <p className="text-lg font-black text-slate-800">{data.certificates.length}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase">Sertifikat</p>
-                  </div>
-                </div>
-              </div>
-            </section>
+                  <ul className="space-y-3">
+                     {[
+                       "Akses 100+ Materi Video",
+                       "Sertifikat Digital Resmi",
+                       "Konsultasi via WhatsApp",
+                       "Potongan 50% Event Offline"
+                     ].map(feat => (
+                        <li key={feat} className="flex items-center gap-3 text-[11px] font-medium text-white/80">
+                           <div className="h-1.5 w-1.5 rounded-full bg-[#E5B54F]" />
+                           {feat}
+                        </li>
+                     ))}
+                  </ul>
+                  <Link href="/student/packages" className="block w-full bg-white text-[#1A2E44] font-black text-xs py-4 rounded-2xl text-center shadow-xl hover:bg-[#E5B54F] hover:text-white transition-all transform hover:-translate-y-1">
+                     Beli Paket Sekarang
+                  </Link>
+               </div>
+            </div>
 
-            {/* Sertifikat Terbaru */}
-            {data.certificates.length > 0 && (
-              <section>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xs font-black uppercase tracking-[0.15em] text-slate-400">Pencapaian Sertifikat</h2>
-                  <Link href="/student/certificates" className="text-xs font-bold text-[#E5B54F] hover:underline">Semua</Link>
-                </div>
-                <div className="space-y-4">
-                  {data.certificates.slice(0, 2).map((c) => (
-                    <div key={c.id} className="bg-gradient-to-br from-[#FCFBF7] to-white border border-[#E5B54F]/20 rounded-[24px] p-5 flex items-center gap-5 shadow-sm group hover:shadow-md transition-all">
-                      <div className="h-14 w-14 bg-[#F9F6EE] rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-inner">
-                        🏅
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-black text-[#1A2E44] text-sm truncate">{c.courseName}</p>
-                        <p className="text-[10px] font-bold text-[#E5B54F] uppercase tracking-wider mt-1">Lulus: {new Date(c.issuedAt).toLocaleDateString("id-ID")}</p>
-                      </div>
-                      {c.downloadUrl && (
-                        <a href={c.downloadUrl} className="h-10 w-10 rounded-xl bg-[#1A2E44] text-white flex items-center justify-center hover:bg-[#E5B54F] transition-colors shadow-lg shadow-[#1A2E44]/10">
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                        </a>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Bantuan Card */}
-            <IslamicPanel variant="navy" className="p-8 text-white relative group overflow-hidden">
-              <div className="relative z-10">
-                <h3 className="text-xl font-black mb-3">Butuh Bantuan?</h3>
-                <p className="text-xs text-white/60 leading-relaxed mb-6">Ustadz dan tim admin kami siap membantu kendala belajar Anda kapan pun.</p>
-                <a href="https://wa.me/6285704833249" target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 w-full bg-[#E5B54F] text-[#1A2E44] font-black text-xs py-4 rounded-2xl hover:bg-white transition-all shadow-xl">
-                   <span>Hubungi via WhatsApp</span>
-                </a>
-              </div>
-              <div className="absolute -bottom-4 -right-4 text-white opacity-5 pointer-events-none">
-                 <HelpCircle size={100} />
-              </div>
-            </IslamicPanel>
+            {/* 3. Help Card */}
+            <div className="bg-white rounded-[35px] p-8 border-2 border-dashed border-slate-100 flex flex-col items-center text-center">
+               <div className="h-14 w-14 bg-amber-50 text-[#E5B54F] rounded-full flex items-center justify-center mb-4">
+                  <HelpCircle size={28} />
+               </div>
+               <h4 className="font-black text-[#1A2E44]">Punya Pertanyaan?</h4>
+               <p className="text-xs text-slate-400 mt-2 leading-relaxed mb-6">Hubungi admin kami untuk bantuan teknis dan panduan belajar.</p>
+               <a href="https://wa.me/6285704833249" className="text-xs font-black text-[#1A2E44] hover:text-[#E5B54F] transition-colors underline">Chat WhatsApp</a>
+            </div>
 
           </div>
         </div>

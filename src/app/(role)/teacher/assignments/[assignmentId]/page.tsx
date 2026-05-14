@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { getAuthCookieName } from "@/lib/auth/jwt";
-import { getRequestOrigin } from "@/lib/origin";
-import { AssignmentGrading } from "@/components/management/assignment-grading";
-import BackButton from "@/components/BackButton";
+import { getAuthCookieName } from "@/shared/lib/auth/jwt";
+import { getRequestOrigin } from "@/shared/lib/origin";
+import { AssignmentGrading } from "@/features/courses/components/management/assignment-grading";
+import BackButton from "@/shared/components/ui/BackButton";
 
 type Attachment = {
   id: string;

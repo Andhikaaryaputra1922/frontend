@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { getRequestOrigin } from "@/lib/origin";
+import { getRequestOrigin } from "@/shared/lib/origin";
 import { ArrowUpRight, Search } from "lucide-react";
 import { cookies } from "next/headers";
-import { getAuthCookieName, verifyUserJwt } from "@/lib/auth/jwt";
-import { EnrollButton } from "@/components/enroll-button";
+import { getAuthCookieName, verifyUserJwt } from "@/shared/lib/auth/jwt";
+import { EnrollButton } from "@/features/packages/components/enroll-button";
 
 async function getCourses() {
   const baseUrl = await getRequestOrigin();

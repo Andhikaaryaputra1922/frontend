@@ -22,7 +22,7 @@ export default function LoginPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ identifier, password }),
+        body: JSON.stringify({ email: identifier, password }),
       });
 
       if (!response.ok) {

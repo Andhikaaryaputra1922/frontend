@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { getAuthCookieName, verifyUserJwt } from "@/lib/auth/jwt";
-import { getRequestOrigin } from "@/lib/origin";
-import { QuizzesManager } from "@/components/management/quizzes-manager";
-import BackButton from "@/components/BackButton";
+import { getAuthCookieName, verifyUserJwt } from "@/shared/lib/auth/jwt";
+import { getRequestOrigin } from "@/shared/lib/origin";
+import { QuizzesManager } from "@/features/courses/components/management/quizzes-manager";
+import BackButton from "@/shared/components/ui/BackButton";
 
 type Course = { id: string; title: string; teacher?: { id: string } | null };
 

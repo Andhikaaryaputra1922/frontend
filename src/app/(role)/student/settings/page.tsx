@@ -1,4 +1,4 @@
-import StudentSettingsClient from "@/components/student/StudentSettingsClient";
+import StudentSettingsClient from "@/features/users/components/student/StudentSettingsClient";
 
 export default function StudentSettingsPage() {
   return (

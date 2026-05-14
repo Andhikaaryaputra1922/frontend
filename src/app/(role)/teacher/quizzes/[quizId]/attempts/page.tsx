@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { getAuthCookieName } from "@/lib/auth/jwt";
-import { getRequestOrigin } from "@/lib/origin";
-import BackButton from "@/components/BackButton";
+import { getAuthCookieName } from "@/shared/lib/auth/jwt";
+import { getRequestOrigin } from "@/shared/lib/origin";
+import BackButton from "@/shared/components/ui/BackButton";
 
 type Attempt = {
   id: string;

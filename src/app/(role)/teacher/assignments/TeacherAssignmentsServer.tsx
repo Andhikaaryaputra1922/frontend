@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
-import { getAuthCookieName, verifyUserJwt } from "@/lib/auth/jwt";
-import { getRequestOrigin } from "@/lib/origin";
+import { getAuthCookieName, verifyUserJwt } from "@/shared/lib/auth/jwt";
+import { getRequestOrigin } from "@/shared/lib/origin";
 
 type Course = { id: string; title: string; teacher?: { id: string } | null };
 type Assignment = {
