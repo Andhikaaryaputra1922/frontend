@@ -45,7 +45,7 @@ export default async function TeacherAssignmentsPage() {
   ]);
 
   const filteredCourses = auth?.role === "TEACHER"
-    ? allCourses.filter((c) => c.teacherId === auth.uid)
+    ? allCourses.filter((c: any) => c.teachers?.some((t: any) => t.id === auth.uid))
     : allCourses;
 
   return (

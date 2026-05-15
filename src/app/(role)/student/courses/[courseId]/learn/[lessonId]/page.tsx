@@ -21,8 +21,8 @@ async function getCourseSyllabus(courseId: string, token: string) {
   return res.json();
 }
 
-export default async function StudentLearnPage({ params }: { params: { courseId: string; lessonId: string } }) {
-  const { courseId, lessonId } = params;
+export default async function StudentLearnPage({ params }: { params: Promise<{ courseId: string; lessonId: string }> }) {
+  const { courseId, lessonId } = await params;
   const cookieStore = await cookies();
   const token = cookieStore.get(getAuthCookieName())?.value ?? "";
 

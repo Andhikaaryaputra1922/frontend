@@ -18,6 +18,11 @@ interface UserProfile {
   phone: string | null;
   image: string | null;
   role: string;
+  address: string | null;
+  dateOfBirth: string | null;
+  gender: string | null;
+  school: string | null;
+  bio: string | null;
 }
 
 interface PackageInfo {

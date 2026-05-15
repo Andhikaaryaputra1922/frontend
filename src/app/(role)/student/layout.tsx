@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import StudentHeader from "@/features/users/components/layouts/StudentHeader";
 import StudentSidebar from "@/features/users/components/layouts/StudentSidebar";
+import { ThemeProvider } from "@/shared/components/ui/theme-provider";
 
 export default function StudentLayout({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
@@ -19,16 +20,17 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
     }).catch(console.error)
     .finally(() => setLoaded(true));
   }, []);
-
   return (
-    <div className="flex min-h-screen bg-[#FDFDFD]">
-      <StudentSidebar name={user?.name} email={user?.email} hasActivePackage={loaded ? hasActivePackage : undefined} />
-      <div className="flex-1 flex flex-col min-w-0">
-        <StudentHeader name={user?.name} />
-        <div className="flex-1">
-          {children}
+    <ThemeProvider>
+      <div className="flex min-h-screen bg-[#FDFDFD] dark:bg-[#0A1628] transition-colors duration-300">
+        <StudentSidebar name={user?.name} email={user?.email} hasActivePackage={loaded ? hasActivePackage : undefined} />
+        <div className="flex-1 flex flex-col min-w-0">
+          <StudentHeader name={user?.name} />
+          <div className="flex-1">
+            {children}
+          </div>
         </div>
       </div>
-    </div>
+    </ThemeProvider>
   );
 }

@@ -36,7 +36,7 @@ export function PremiumModal({
       case "error": return <XCircle className="h-12 w-12 text-rose-500" />;
       case "warning": return <AlertCircle className="h-12 w-12 text-amber-500" />;
       case "confirm": return <Info className="h-12 w-12 text-blue-500" />;
-      case "logout": return <LogOut className="h-12 w-12 text-[#8B0000]" />;
+      case "logout": return <LogOut className="h-12 w-12 text-[#E5B54F]" />;
       case "delete": return <Trash2 className="h-12 w-12 text-rose-500" />;
       case "save": return <Save className="h-12 w-12 text-blue-600" />;
       default: return <Info className="h-12 w-12 text-slate-400" />;
@@ -48,7 +48,7 @@ export function PremiumModal({
       case "success": return "bg-emerald-500 hover:bg-emerald-600";
       case "error": return "bg-rose-500 hover:bg-rose-600";
       case "warning": return "bg-amber-500 hover:bg-amber-600";
-      case "logout": return "bg-[#8B0000] hover:bg-[#6B0000]";
+      case "logout": return "bg-[#1A2E44] hover:bg-[#0A1628]";
       case "delete": return "bg-rose-600 hover:bg-rose-700";
       case "save": return "bg-blue-600 hover:bg-blue-700";
       default: return "bg-slate-800 hover:bg-slate-900";

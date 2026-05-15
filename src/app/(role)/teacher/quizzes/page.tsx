@@ -5,7 +5,7 @@ import { getRequestOrigin } from "@/shared/lib/origin";
 import { QuizzesManager } from "@/features/courses/components/management/quizzes-manager";
 import BackButton from "@/shared/components/ui/BackButton";
 
-type Course = { id: string; title: string; teacher?: { id: string } | null };
+type Course = { id: string; title: string; teachers?: { id: string }[] };
 
 type Quiz = {
   id: string;
@@ -43,7 +43,7 @@ export default async function TeacherQuizzesPage() {
 
   const [courses, quizzes] = await Promise.all([getCourses(baseUrl), getQuizzes(baseUrl, token)]);
   const filteredCourses =
-    auth?.role === "TEACHER" ? courses.filter((c) => c.teacher?.id === auth.uid) : courses;
+    auth?.role === "TEACHER" ? courses.filter((c) => c.teachers?.some(t => t.id === auth.uid)) : courses;
 
   return (
     <main className="min-h-screen bg-[var(--base)] px-6 py-10">

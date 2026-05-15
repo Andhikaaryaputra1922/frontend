@@ -1,9 +1,10 @@
 import { cookies } from "next/headers";
 import { getAuthCookieName } from "@/shared/lib/auth/jwt";
 import { CourseForm } from "../../course-form";
+import { getRequestOrigin } from "@/shared/lib/origin";
 
-async function getCourse(courseId: string, token: string) {
-  const res = await fetch(`http://localhost:4000/api/courses/${courseId}`, {
+async function getCourse(baseUrl: string, courseId: string, token: string) {
+  const res = await fetch(`${baseUrl}/api/courses/${courseId}`, {
     cache: "no-store",
     headers: { cookie: `${getAuthCookieName()}=${token}` },
   });
@@ -12,11 +13,12 @@ async function getCourse(courseId: string, token: string) {
   return data.course;
 }
 
-export default async function EditCoursePage({ params }: { params: { courseId: string } }) {
-  const { courseId } = params;
+export default async function EditCoursePage({ params }: { params: Promise<{ courseId: string }> }) {
+  const { courseId } = await params;
+  const baseUrl = await getRequestOrigin();
   const cookieStore = await cookies();
   const token = cookieStore.get(getAuthCookieName())?.value ?? "";
-  const course = await getCourse(courseId, token);
+  const course = await getCourse(baseUrl, courseId, token);
 
   if (!course) return <div className="p-20 text-center">Course not found</div>;
 

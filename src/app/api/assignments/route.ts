@@ -1,62 +1,52 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000";
+
+// Semua request ke /api/assignments diteruskan ke Express backend
+export async function GET(request: Request) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("lms_token")?.value;
+  const { searchParams } = new URL(request.url);
+
+  const res = await fetch(
+    `${BACKEND}/api/assignments?${searchParams.toString()}`,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Cookie: `lms_token=${token}` } : {}),
+      },
+    }
+  );
+  const data = await res.json().catch(() => ({}));
+  return NextResponse.json(data, { status: res.status });
+}
 
 export async function POST(request: Request) {
-  try {
-    const data = await request.formData();
+  const cookieStore = await cookies();
+  const token = cookieStore.get("lms_token")?.value;
 
-    const title = data.get("title") as string;
-    const description = data.get("description") as string;
-    const dueDate = data.get("dueDate") as string;
-    const maxScore = Number(data.get("maxScore"));
-    const courseId = data.get("courseId") as string;
+  // Cek apakah multipart form (ada file upload) atau JSON
+  const contentType = request.headers.get("content-type") ?? "";
 
-    const file = data.get("file") as File | null;
-    const linkUrl = data.get("linkUrl") as string;
+  let body: BodyInit;
+  let headers: Record<string, string> = {};
+  if (token) headers["Cookie"] = `lms_token=${token}`;
 
-    console.log({
-      title,
-      description,
-      dueDate,
-      maxScore,
-      courseId,
-      file,
-      linkUrl,
-    });
-
-    /*
-    ============================================
-    SIMPAN KE DATABASE
-    ============================================
-    */
-
-    // contoh prisma
-    /*
-    await prisma.assignment.create({
-      data: {
-        title,
-        description,
-        dueDate: new Date(dueDate),
-        maxScore,
-        courseId,
-        attachmentUrl: linkUrl || null,
-      },
-    });
-    */
-
-    return NextResponse.json({
-      success: true,
-    });
-
-  } catch (error) {
-    console.error(error);
-
-    return NextResponse.json(
-      {
-        error: "Gagal membuat assignment",
-      },
-      {
-        status: 500,
-      }
-    );
+  if (contentType.includes("multipart/form-data")) {
+    body = await request.formData();
+    // Jangan set Content-Type — biarkan browser set boundary secara otomatis
+  } else {
+    body = await request.text();
+    headers["Content-Type"] = "application/json";
   }
+
+  const res = await fetch(`${BACKEND}/api/assignments`, {
+    method: "POST",
+    headers,
+    body,
+  });
+
+  const data = await res.json().catch(() => ({}));
+  return NextResponse.json(data, { status: res.status });
 }

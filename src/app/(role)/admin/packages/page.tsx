@@ -1,349 +1,475 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
+import { Plus, Search, Edit3, Trash2, Check, Package as PackageIcon, Book, User, Clock } from "lucide-react";
 import { PremiumModal, Toast } from "@/shared/components/ui/PremiumFeedback";
-import { useRouter } from "next/navigation";
 
-/* ── Types ──────────────────────────────────────────── */
+// ── Types ────────────────────────────────────────────────────────
+interface Teacher { id: string; name: string }
+interface Course {
+  id: string;
+  title: string;
+  teachers: Teacher[];
+}
 interface PackageCourse {
   courseId: string;
-  lessonLimit: number | null;
-  course: { id: string; title: string };
+  course: Course;
 }
-
-interface Package {
+interface Pkg {
   id: string;
   name: string;
   description: string | null;
   price: number;
-  defaultLessonLimit: number;
+  defaultLessonLimit: number; // mapped from backend
+  durationInDays?: number;    // legacy/compat fallback
   isActive: boolean;
-  createdAt: string;
   packageCourses: PackageCourse[];
 }
 
-/* ── Icons ──────────────────────────────────────────── */
-const IC = {
-  Plus: () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-  ),
-  Back: () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-  ),
-  Package: () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-      <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
-    </svg>
-  ),
-  Check: () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-  ),
-  Pause: () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-  ),
-  Book: () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-  ),
-  Dollar: () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-  ),
-  Calendar: () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-  ),
-  Image: () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-  ),
-  X: () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-  ),
-  Arrow: () => (
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-  ),
+// ── Default form state ───────────────────────────────────────────
+const DEFAULT_FORM = {
+  id: "",
+  name: "",
+  description: "",
+  price: "",
+  durationInDays: "0",
+  courseIds: [] as string[],
+  isActive: true,
 };
 
+// ── Page ─────────────────────────────────────────────────────────
 export default function AdminPackagesPage() {
-  const router = useRouter();
-  const [packages, setPackages] = useState<Package[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showCreate, setShowCreate] = useState(false);
-  const [creating, setCreating] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
+  const [packages, setPackages]     = useState<Pkg[]>([]);
+  const [published, setPublished]   = useState<Course[]>([]); // only PUBLISHED courses
+  const [loading, setLoading]       = useState(true);
+  const [toast, setToast]           = useState<{ message: string; type: "success"|"error"|"info" }|null>(null);
 
-  const [formName, setFormName] = useState("");
-  const [formDesc, setFormDesc] = useState("");
-  const [formPrice, setFormPrice] = useState("");
-  const [formLimit, setFormLimit] = useState("");
-  const [formImage, setFormImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  // Search states
+  const [pkgSearch, setPkgSearch]       = useState("");
+  const [courseSearch, setCourseSearch] = useState("");
 
-  const fetchPackages = useCallback(async () => {
+  // Modal states
+  const [showModal, setShowModal]   = useState(false);
+  const [isEditing, setIsEditing]   = useState(false);
+  const [saving, setSaving]         = useState(false);
+  const [form, setForm]             = useState({ ...DEFAULT_FORM });
+
+  // Delete modal
+  const [delModal, setDelModal]     = useState({ open: false, id: "", name: "" });
+  const [deleting, setDeleting]     = useState(false);
+
+  // ── Fetch data ──────────────────────────────────────────────────
+  const load = useCallback(async () => {
+    setLoading(true);
     try {
-      const res = await fetch("/api/admin/packages", { credentials: "include" });
-      if (!res.ok) return;
-      const data = await res.json();
-      const mapped = (data.packages ?? []).map((p: any) => ({
-        ...p,
-        price: Number(p.price)
-      }));
-      setPackages(mapped);
-    } catch (err) { console.error(err); }
-    finally { setLoading(false); }
+      const [pkgRes, crsRes] = await Promise.all([
+        fetch("/api/admin/packages",              { credentials: "include" }),
+        fetch("/api/courses?status=PUBLISHED",    { credentials: "include" }),  // ← only published!
+      ]);
+      if (pkgRes.ok) setPackages((await pkgRes.json().catch(() => ({}))).packages ?? []);
+      if (crsRes.ok) setPublished((await crsRes.json().catch(() => ({}))).courses  ?? []);
+
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  useEffect(() => { fetchPackages(); }, [fetchPackages]);
+  useEffect(() => { load(); }, [load]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setFormImage(file);
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setImagePreview(reader.result as string);
-      reader.readAsDataURL(file);
-    } else {
-      setImagePreview(null);
-    }
+  // ── Helpers ─────────────────────────────────────────────────────
+  const showToast = (message: string, type: "success"|"error"|"info" = "success") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
   };
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (creating) return;
-    setCreating(true);
-    try {
-      // If we have an image, upload it first
-      let imageUrl: string | undefined;
-      if (formImage) {
-        const fd = new FormData();
-        fd.append("file", formImage);
-        const uploadRes = await fetch("/api/uploads", { method: "POST", credentials: "include", body: fd });
-        if (uploadRes.ok) {
-          const uploadData = await uploadRes.json();
-          imageUrl = uploadData.url;
-        }
-      }
+  // collect unique teacher names across all courses in a package
+  const getTeachers = (pkg: Pkg): string[] => {
+    const names = new Set<string>();
+    pkg.packageCourses?.forEach(pc =>
+      pc.course?.teachers?.forEach(t => t?.name && names.add(t.name))
+    );
+    return [...names];
+  };
 
-      const res = await fetch("/api/admin/packages", {
-        method: "POST", credentials: "include",
+  const openCreate = () => {
+    setIsEditing(false);
+    setForm({ ...DEFAULT_FORM });
+    setCourseSearch("");
+    setShowModal(true);
+  };
+
+  const openEdit = (pkg: Pkg) => {
+    setIsEditing(true);
+    setForm({
+      id:            pkg.id,
+      name:          pkg.name,
+      description:   pkg.description ?? "",
+      price:         pkg.price?.toString() ?? "0",
+      durationInDays: (pkg.defaultLessonLimit ?? pkg.durationInDays ?? 0).toString(),
+      courseIds:     pkg.packageCourses?.map(pc => pc.courseId) ?? [],
+      isActive:      pkg.isActive,
+    });
+    setCourseSearch("");
+    setShowModal(true);
+  };
+
+  const toggleCourse = (id: string) =>
+    setForm(prev => ({
+      ...prev,
+      courseIds: prev.courseIds.includes(id)
+        ? prev.courseIds.filter(c => c !== id)
+        : [...prev.courseIds, id],
+    }));
+
+  // ── Save ────────────────────────────────────────────────────────
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (form.courseIds.length === 0) {
+      return showToast("Pilih minimal satu mata pelajaran", "error");
+    }
+    setSaving(true);
+    try {
+      const url    = isEditing ? `/api/admin/packages/${form.id}` : "/api/admin/packages";
+      const method = isEditing ? "PUT" : "POST";
+      const res    = await fetch(url, {
+        method,
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: formName.trim(),
-          description: formDesc.trim() || undefined,
-          price: Number(formPrice) || 0,
-          defaultLessonLimit: Number(formLimit) || 0,
-          imageUrl,
+          name:          form.name,
+          description:   form.description,
+          price:         Number(form.price),
+          durationInDays: Number(form.durationInDays),
+          isActive:      form.isActive,
+          courseIds:     form.courseIds,
         }),
       });
       if (res.ok) {
-        setFormName(""); setFormDesc(""); setFormPrice(""); setFormLimit("");
-        setFormImage(null); setImagePreview(null);
-        setShowCreate(false);
-        fetchPackages();
-        setToast({ message: "Paket berhasil dibuat!", type: "success" });
+        showToast(isEditing ? "Paket diperbarui" : "Paket berhasil dibuat");
+        setShowModal(false);
+        load();
       } else {
-        const err = await res.json();
-        setToast({ message: err.message || "Gagal membuat paket", type: "error" });
+        const err = await res.json().catch(() => ({}));
+        showToast(err.message ?? "Gagal menyimpan", "error");
       }
-    } catch { 
-      setToast({ message: "Terjadi kesalahan jaringan", type: "error" }); 
+    } finally {
+      setSaving(false);
     }
-    finally { setCreating(false); }
   };
 
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(price);
+  // ── Delete ──────────────────────────────────────────────────────
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await fetch(`/api/admin/packages/${delModal.id}`, { method: "DELETE", credentials: "include" });
+      showToast("Paket dihapus");
+      setDelModal({ open: false, id: "", name: "" });
+      load();
+    } finally {
+      setDeleting(false);
+    }
+  };
 
-  if (loading) {
-    return (
-      <main className="min-h-screen bg-[var(--base)] px-6 py-10">
-        <div className="mx-auto max-w-5xl flex items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#8B0000] border-t-transparent" />
-          <p className="text-sm text-slate-500">Memuat data paket…</p>
-        </div>
-      </main>
-    );
-  }
+  // ── Filtered lists ──────────────────────────────────────────────
+  const visiblePkgs     = packages.filter(p => p.name.toLowerCase().includes(pkgSearch.toLowerCase()));
+  const visibleCourses  = published.filter(c => c.title.toLowerCase().includes(courseSearch.toLowerCase()));
 
-  const totalActive = packages.filter(p => p.isActive).length;
-  const totalInactive = packages.filter(p => !p.isActive).length;
-  const totalCourses = new Set(packages.flatMap(p => p.packageCourses.map(pc => pc.courseId))).size;
-
+  // ── Render ──────────────────────────────────────────────────────
   return (
-    <>
-      <main className="min-h-screen bg-[var(--base)] px-6 py-10">
-      <div className="mx-auto max-w-5xl">
-        <div className="rounded-2xl border border-slate-200 bg-white p-7 md:p-10 shadow-sm">
+    <div className="p-6 md:p-10 animate-in fade-in duration-500">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      <PremiumModal
+        isOpen={delModal.open}
+        onClose={() => setDelModal({ open: false, id: "", name: "" })}
+        onConfirm={handleDelete}
+        title="Hapus Paket"
+        message={`Hapus paket "${delModal.name}"? Siswa yang sudah membeli tidak terpengaruh.`}
+        type="delete"
+        loading={deleting}
+      />
 
-          {/* Header */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <Link href="/admin" className="mb-2 inline-flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-slate-700 transition-colors">
-                <IC.Back /> Admin Panel
-              </Link>
-              <h1 className="text-2xl font-black tracking-tight text-slate-900 md:text-3xl">Manajemen Paket</h1>
-              <p className="mt-1 text-sm text-slate-500">Kelola paket belajar siswa.</p>
+      {/* ── Header ── */}
+      <div className="max-w-6xl mx-auto">
+        <header className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="h-1 w-6 rounded-full bg-[#8B0000] inline-block" />
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Bundle &amp; Harga</span>
             </div>
-            <button onClick={() => setShowCreate(true)}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#8B0000] px-5 py-3 text-sm font-bold text-white shadow-md shadow-[#8B0000]/20 transition-all hover:bg-[#6B0000] hover:shadow-lg hover:-translate-y-0.5">
-              <IC.Plus /> Buat Paket Baru
-            </button>
+            <h1 className="text-3xl font-black text-[#1A2E44] uppercase tracking-tighter">
+              Manajemen <span className="text-[#8B0000]">Paket</span>
+            </h1>
+            <p className="text-[11px] text-slate-400 font-medium mt-1">
+              Bundling mapel yang sudah terbit → tentukan harga → tampilkan ke siswa
+            </p>
           </div>
+          <button
+            onClick={openCreate}
+            className="flex items-center gap-2 bg-[#1A2E44] text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-[#8B0000] transition-all shadow-xl active:scale-95"
+          >
+            <Plus size={16} strokeWidth={3} /> Buat Paket
+          </button>
+        </header>
 
-          {/* Stats */}
-          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {[
-              { label: "Total Paket", value: packages.length, icon: <IC.Package />, color: "text-[#8B0000]", bg: "bg-red-50" },
-              { label: "Paket Aktif", value: totalActive, icon: <IC.Check />, color: "text-emerald-600", bg: "bg-emerald-50" },
-              { label: "Nonaktif", value: totalInactive, icon: <IC.Pause />, color: "text-slate-500", bg: "bg-slate-100" },
-              { label: "Total Course", value: totalCourses, icon: <IC.Book />, color: "text-violet-600", bg: "bg-violet-50" },
-            ].map((s) => (
-              <div key={s.label} className={`rounded-xl border border-slate-200 ${s.bg} p-4`}>
-                <div className={`${s.color} mb-2`}>{s.icon}</div>
-                <p className="text-2xl font-black text-slate-800">{s.value}</p>
-                <p className="text-[11px] text-slate-500 font-semibold">{s.label}</p>
+        {/* ── Search ── */}
+        <div className="relative mb-8">
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
+          <input
+            type="text"
+            placeholder="Cari paket..."
+            value={pkgSearch}
+            onChange={e => setPkgSearch(e.target.value)}
+            className="w-full pl-12 pr-6 py-4 rounded-2xl border border-slate-100 bg-white font-bold text-sm focus:outline-none focus:ring-4 focus:ring-[#8B0000]/5"
+          />
+        </div>
+
+        {/* ── Package cards ── */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1,2,3].map(i => <div key={i} className="h-64 rounded-[32px] bg-slate-50 animate-pulse" />)}
+          </div>
+        ) : visiblePkgs.length === 0 ? (
+          <div className="py-24 text-center text-[10px] font-black text-slate-200 uppercase tracking-[0.4em]">
+            Belum ada paket — klik "Buat Paket" untuk mulai
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {visiblePkgs.map(pkg => (
+              <div key={pkg.id} className="group bg-white rounded-[36px] border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col overflow-hidden">
+                <div className="p-7 flex-1 space-y-4">
+                  {/* Status + Durasi */}
+                  <div className="flex items-center justify-between">
+                    <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${pkg.isActive ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-400"}`}>
+                      {pkg.isActive ? "Aktif" : "Nonaktif"}
+                    </span>
+                    <span className="flex items-center gap-1 text-[9px] font-black text-slate-300 uppercase">
+                      <Clock size={11} />
+                      {(pkg.defaultLessonLimit ?? pkg.durationInDays ?? 0) > 0 ? `${pkg.defaultLessonLimit ?? pkg.durationInDays} hari` : "Selamanya"}
+                    </span>
+                  </div>
+
+                  {/* Nama & Harga */}
+                  <div>
+                    <h3 className="text-lg font-black text-[#1A2E44] uppercase tracking-tight leading-tight">{pkg.name}</h3>
+                    <p className="text-[11px] font-black text-[#8B0000] mt-0.5">Rp {pkg.price.toLocaleString("id-ID")}</p>
+                  </div>
+
+                  {/* Daftar Mapel */}
+                  <div className="space-y-1">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                      <Book size={11} /> Mata Pelajaran ({pkg.packageCourses?.length ?? 0})
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {pkg.packageCourses?.map(pc => (
+                        <span key={pc.courseId} className="px-2 py-0.5 rounded-lg bg-slate-50 border border-slate-100 text-[8px] font-bold text-slate-500 uppercase">
+                          {pc.course?.title}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Tim Pengajar */}
+                  <div className="border-t border-slate-50 pt-3 space-y-1">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                      <User size={11} className="text-[#E5B54F]" /> Tim Pengajar
+                    </p>
+                    <p className="text-[9px] font-black text-[#1A2E44] uppercase leading-relaxed">
+                      {getTeachers(pkg).join(" · ") || "—"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="px-4 pb-4 flex gap-2">
+                  <button
+                    onClick={() => openEdit(pkg)}
+                    className="flex-1 py-3 rounded-2xl bg-slate-50 border border-slate-100 text-[10px] font-black uppercase text-slate-400 hover:text-[#1A2E44] hover:border-[#1A2E44] transition-all flex items-center justify-center gap-1.5"
+                  >
+                    <Edit3 size={13} /> Edit
+                  </button>
+                  <button
+                    onClick={() => setDelModal({ open: true, id: pkg.id, name: pkg.name })}
+                    className="p-3 rounded-2xl bg-slate-50 border border-slate-100 text-slate-300 hover:text-red-500 hover:border-red-200 transition-all"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
-
-          {/* Package Cards */}
-          {packages.length === 0 ? (
-            <div className="mt-10 flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 py-16">
-              <div className="text-slate-300 mb-4"><IC.Package /></div>
-              <p className="text-lg font-bold text-slate-700">Belum ada paket</p>
-              <p className="mt-1 text-sm text-slate-500">Buat paket pertama untuk mulai mengatur siswa</p>
-              <button onClick={() => setShowCreate(true)}
-                className="mt-6 rounded-xl bg-[#8B0000] px-6 py-2.5 text-sm font-bold text-white transition hover:-translate-y-0.5">
-                Buat Paket
-              </button>
-            </div>
-          ) : (
-            <div className="mt-8 grid gap-4 md:grid-cols-2">
-              {packages.map((pkg) => (
-                <button key={pkg.id} onClick={() => router.push(`/admin/packages/${pkg.id}`)}
-                  className="group relative rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:border-[#8B0000]/30">
-
-                  <div className="absolute right-4 top-4">
-                    <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-bold ${
-                      pkg.isActive ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"
-                    }`}>
-                      <span className={`h-1.5 w-1.5 rounded-full ${pkg.isActive ? "bg-emerald-500" : "bg-slate-400"}`} />
-                      {pkg.isActive ? "Aktif" : "Nonaktif"}
-                    </span>
-                  </div>
-
-                  <p className="text-base font-black text-slate-900 pr-24">{pkg.name}</p>
-                  {pkg.description && <p className="mt-1 text-sm text-slate-500 line-clamp-2">{pkg.description}</p>}
-
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-50 border border-slate-100 px-2.5 py-1.5 text-xs font-semibold text-slate-700">
-                      <IC.Dollar /> {formatPrice(Number(pkg.price))}
-                    </span>
-                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-50 border border-slate-100 px-2.5 py-1.5 text-xs font-semibold text-slate-700">
-                      <IC.Calendar /> {pkg.defaultLessonLimit <= 0 ? "Unlimited" : `${pkg.defaultLessonLimit} pertemuan`}
-                    </span>
-                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-50 border border-slate-100 px-2.5 py-1.5 text-xs font-semibold text-slate-700">
-                      <IC.Book /> {pkg.packageCourses.length} course
-                    </span>
-                  </div>
-
-                  {pkg.packageCourses.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1.5">
-                      {pkg.packageCourses.slice(0, 3).map((pc) => (
-                        <span key={pc.courseId} className="rounded-md bg-[#8B0000]/10 px-2 py-0.5 text-[10px] font-bold text-[#8B0000]">{pc.course.title}</span>
-                      ))}
-                      {pkg.packageCourses.length > 3 && (
-                        <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">+{pkg.packageCourses.length - 3} lagi</span>
-                      )}
-                    </div>
-                  )}
-
-                  <div className="mt-4 inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-500 transition-colors group-hover:bg-[#8B0000] group-hover:text-white group-hover:border-transparent">
-                    Kelola Paket <IC.Arrow />
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        )}
       </div>
 
-      {/* ── Create Modal ─────────────────────────────────── */}
-      {showCreate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-7 shadow-2xl">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-black text-slate-900">Buat Paket Baru</h2>
-              <button onClick={() => setShowCreate(false)} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 transition-colors">
-                <IC.X />
+      {/* ═══════════════════════════════════════════════════════════
+          MODAL — Buat / Edit Paket
+          Hanya menampilkan mapel yang sudah PUBLISHED (lolos moderasi)
+      ═══════════════════════════════════════════════════════════ */}
+      {showModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-[#1A2E44]/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-[40px] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
+
+            {/* Modal header */}
+            <div className="sticky top-0 bg-white rounded-t-[40px] px-8 pt-8 pb-5 border-b border-slate-50 flex justify-between items-start z-10">
+              <div>
+                <h3 className="text-xl font-black text-[#1A2E44] uppercase tracking-tighter">
+                  {isEditing ? "Edit Paket" : "Buat Paket Baru"}
+                </h3>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                  Centang mapel yang sudah terbit → atur harga
+                </p>
+              </div>
+              <button onClick={() => setShowModal(false)} className="text-slate-300 hover:text-[#8B0000] mt-1">
+                <Plus size={22} className="rotate-45" />
               </button>
             </div>
 
-            <form onSubmit={handleCreate} className="space-y-4">
-              <div>
-                <label className="mb-1.5 block text-xs font-bold text-slate-500 uppercase tracking-wider">Nama Paket *</label>
-                <input value={formName} onChange={(e) => setFormName(e.target.value)} placeholder="Misal: Paket 10 Pertemuan" required
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#8B0000]/20 focus:border-[#8B0000] focus:bg-white" />
+            <form onSubmit={handleSave} className="px-8 py-6 space-y-6">
+
+              {/* ── Nama Paket ── */}
+              <div className="space-y-1.5">
+                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">Nama Paket *</label>
+                <input
+                  required
+                  value={form.name}
+                  onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
+                  placeholder="Contoh: Paket Tahfidz + Arab"
+                  className="w-full px-5 py-4 rounded-xl border border-slate-100 bg-slate-50 font-bold text-sm focus:outline-none focus:ring-4 focus:ring-[#8B0000]/5"
+                />
               </div>
 
-              <div>
-                <label className="mb-1.5 block text-xs font-bold text-slate-500 uppercase tracking-wider">Deskripsi</label>
-                <textarea value={formDesc} onChange={(e) => setFormDesc(e.target.value)} placeholder="Keterangan singkat tentang paket ini" rows={3}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#8B0000]/20 focus:border-[#8B0000] focus:bg-white resize-none" />
-              </div>
-
-              {/* Image Upload */}
-              <div>
-                <label className="mb-1.5 block text-xs font-bold text-slate-500 uppercase tracking-wider">Gambar Paket</label>
-                <div className="relative group">
-                  <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                  <div className="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center transition-all group-hover:border-[#8B0000] group-hover:bg-red-50/30">
-                    {imagePreview ? (
-                      <div className="flex flex-col items-center">
-                        <img src={imagePreview} alt="Preview" className="h-24 w-auto rounded-lg object-cover shadow-sm mb-2" />
-                        <p className="text-xs font-semibold text-slate-600">{formImage?.name}</p>
-                        <p className="text-[10px] text-slate-400 mt-1">Klik untuk mengganti</p>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center text-slate-400">
-                        <IC.Image />
-                        <p className="mt-2 text-xs font-semibold text-slate-500">Klik atau seret gambar ke sini</p>
-                        <p className="text-[10px] text-slate-400 mt-1">PNG, JPG (Max. 5MB)</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
+              {/* ── Harga + Durasi ── */}
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="mb-1.5 block text-xs font-bold text-slate-500 uppercase tracking-wider">Harga (Rp)</label>
-                  <input type="number" value={formPrice} onChange={(e) => setFormPrice(e.target.value)} placeholder="100000" min="0"
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#8B0000]/20 focus:border-[#8B0000] focus:bg-white" />
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">Harga (Rp) *</label>
+                  <input
+                    type="number" required min="0"
+                    value={form.price}
+                    onChange={e => setForm(p => ({ ...p, price: e.target.value }))}
+                    placeholder="150000"
+                    className="w-full px-5 py-4 rounded-xl border border-slate-100 bg-slate-50 font-bold text-sm focus:outline-none focus:ring-4 focus:ring-[#8B0000]/5"
+                  />
                 </div>
-                <div>
-                  <label className="mb-1.5 block text-xs font-bold text-slate-500 uppercase tracking-wider">Jumlah Pertemuan</label>
-                  <input type="number" value={formLimit} onChange={(e) => setFormLimit(e.target.value)} placeholder="10" min="0"
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#8B0000]/20 focus:border-[#8B0000] focus:bg-white" />
-                  <p className="mt-1 text-[10px] text-slate-400">0 = unlimited</p>
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">Masa Aktif (Hari, 0 = Selamanya)</label>
+                  <input
+                    type="number" min="0" required
+                    value={form.durationInDays}
+                    onChange={e => setForm(p => ({ ...p, durationInDays: e.target.value }))}
+                    className="w-full px-5 py-4 rounded-xl border border-slate-100 bg-slate-50 font-bold text-sm focus:outline-none focus:ring-4 focus:ring-[#8B0000]/5"
+                  />
+                  <p className="text-[8px] text-slate-300 font-bold ml-1">0 = selamanya</p>
                 </div>
               </div>
 
+              {/* ══════════════════════════════════════════════════════
+                  PILIHAN MAPEL — hanya yang sudah PUBLISHED
+              ══════════════════════════════════════════════════════ */}
+              <div className="space-y-2">
+                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+                  Pilih Mata Pelajaran&nbsp;
+                  <span className="text-[#8B0000]">({form.courseIds.length} dipilih)</span>
+                  &nbsp;— hanya mapel yang sudah diterbitkan
+                </label>
+
+                {/* Search mapel */}
+                <div className="relative">
+                  <Search size={13} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
+                  <input
+                    type="text"
+                    placeholder="Cari nama mapel..."
+                    value={courseSearch}
+                    onChange={e => setCourseSearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50 text-xs font-bold focus:outline-none"
+                  />
+                </div>
+
+                {/* Checklist mapel */}
+                {visibleCourses.length === 0 ? (
+                  <div className="py-6 text-center text-[10px] font-black text-slate-200 uppercase tracking-widest">
+                    Tidak ada mapel terbit — terbitkan dahulu di menu Mata Pelajaran
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-52 overflow-y-auto pr-1">
+                    {visibleCourses.map(c => {
+                      const selected = form.courseIds.includes(c.id);
+                      return (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => toggleCourse(c.id)}
+                          className={`flex items-center justify-between p-4 rounded-2xl border-2 text-left transition-all ${
+                            selected
+                              ? "border-[#8B0000] bg-red-50/50 shadow-sm"
+                              : "border-slate-100 bg-slate-50/50 hover:border-slate-200"
+                          }`}
+                        >
+                          <div className="min-w-0 flex-1 pr-3">
+                            <p className="text-[10px] font-black text-[#1A2E44] uppercase truncate">{c.title}</p>
+                            {c.teachers?.length > 0 && (
+                              <p className="text-[8px] font-bold text-slate-400 truncate mt-0.5">
+                                {c.teachers.map(t => t.name).join(", ")}
+                              </p>
+                            )}
+                          </div>
+                          <div className={`h-5 w-5 rounded-full flex items-center justify-center shrink-0 transition-all ${
+                            selected ? "bg-[#8B0000]" : "bg-slate-100"
+                          }`}>
+                            {selected && <Check size={10} className="text-white" strokeWidth={3} />}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* ── Deskripsi ── */}
+              <div className="space-y-1.5">
+                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">Deskripsi (Opsional)</label>
+                <textarea
+                  value={form.description}
+                  onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
+                  placeholder="Jelaskan isi paket ini..."
+                  rows={3}
+                  className="w-full px-5 py-4 rounded-xl border border-slate-100 bg-slate-50 font-medium text-sm resize-none focus:outline-none focus:ring-4 focus:ring-[#8B0000]/5"
+                />
+              </div>
+
+              {/* ── Tampilkan ke siswa ── */}
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.isActive}
+                  onChange={e => setForm(p => ({ ...p, isActive: e.target.checked }))}
+                  className="w-4 h-4 rounded border-slate-300 text-[#8B0000] focus:ring-[#8B0000]"
+                />
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  Tampilkan paket ini ke siswa (etalase)
+                </span>
+              </label>
+
+              {/* ── Actions ── */}
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setShowCreate(false)}
-                  className="flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="flex-1 py-4 rounded-xl border border-slate-100 font-black text-[10px] uppercase tracking-widest text-slate-400 hover:bg-slate-50 transition-all"
+                >
                   Batal
                 </button>
-                <button type="submit" disabled={creating || !formName.trim()}
-                  className="flex-1 rounded-xl bg-[#8B0000] px-4 py-3 text-sm font-bold text-white shadow-md shadow-[#8B0000]/20 transition-all hover:bg-[#6B0000] disabled:opacity-50 disabled:cursor-not-allowed">
-                  {creating ? "Menyimpan…" : "Buat Paket"}
+                <button
+                  type="submit"
+                  disabled={saving || form.courseIds.length === 0}
+                  className="flex-1 py-4 rounded-xl bg-[#1A2E44] text-[#E5B54F] font-black text-[10px] uppercase tracking-[0.2em] hover:bg-[#8B0000] hover:text-white transition-all shadow-xl disabled:opacity-40"
+                >
+                  {saving ? "Menyimpan..." : isEditing ? "Simpan Perubahan" : "Buat Paket"}
                 </button>
               </div>
+
             </form>
           </div>
         </div>
       )}
-    </main>
-    {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-  </>
+    </div>
   );
 }

@@ -22,7 +22,7 @@ export default function AdminSettingsPage() {
     try {
       const res = await fetch("/api/users/me", { credentials: "include" });
       if (res.ok) {
-        const d = await res.json();
+        const d = await res.json().catch(() => ({}));
         if (d.user) {
           setFormData({
             name: d.user.name || "",
@@ -60,12 +60,12 @@ export default function AdminSettingsPage() {
       });
 
       if (res.ok) {
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
         setFormData((prev) => ({ ...prev, image: data.url }));
         setToast({ message: "Foto profil admin berhasil diperbarui!", type: "success" });
         router.refresh();
       } else {
-        const err = await res.json();
+        const err = await res.json().catch(() => ({}));
         setToast({ message: err.message || "Gagal mengunggah foto", type: "error" });
       }
     } catch {
@@ -94,7 +94,7 @@ export default function AdminSettingsPage() {
         setToast({ message: "Profil admin berhasil disimpan!", type: "success" });
         fetchProfile();
       } else {
-        const err = await res.json();
+        const err = await res.json().catch(() => ({}));
         setToast({ message: err.message || "Gagal menyimpan profil", type: "error" });
       }
     } catch {

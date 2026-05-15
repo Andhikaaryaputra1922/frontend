@@ -50,11 +50,11 @@ export default function PackageDetailPage() {
         fetch(`/api/admin/packages/${packageId}/students`, { credentials: "include" }),
       ]);
       if (pkgRes.ok) {
-        const d = await pkgRes.json();
+        const d = await pkgRes.json().catch(() => ({}));
         const found = (d.packages ?? []).find((p: Pkg) => p.id === packageId);
         if (found) { setPkg(found); setEditName(found.name); setEditDesc(found.description ?? ""); setEditPrice(String(found.price)); setEditLimit(String(found.defaultLessonLimit)); }
       }
-      if (studRes.ok) { const d = await studRes.json(); setStudents(d.students ?? []); }
+      if (studRes.ok) { const d = await studRes.json().catch(() => ({})); setStudents(d.students ?? []); }
     } catch (e) { console.error(e); } finally { setLoading(false); }
   }, [packageId]);
 
@@ -66,7 +66,7 @@ export default function PackageDetailPage() {
     const t = setTimeout(async () => {
       try {
         const res = await fetch(`/api/admin/students?search=${encodeURIComponent(studentSearch)}`, { credentials: "include" });
-        if (res.ok) { const d = await res.json(); setStudentOptions(d.students ?? []); }
+        if (res.ok) { const d = await res.json().catch(() => ({})); setStudentOptions(d.students ?? []); }
       } catch {}
     }, 300);
     return () => clearTimeout(t);
@@ -78,7 +78,7 @@ export default function PackageDetailPage() {
     (async () => {
       try {
         const res = await fetch("/api/admin/courses", { credentials: "include" });
-        if (res.ok) { const d = await res.json(); setCourseOptions(d.courses ?? []); }
+        if (res.ok) { const d = await res.json().catch(() => ({})); setCourseOptions(d.courses ?? []); }
       } catch {}
     })();
   }, [showAddCourse]);
@@ -94,7 +94,7 @@ export default function PackageDetailPage() {
         body: JSON.stringify(body),
       });
       if (res.ok) { setShowAddStudent(false); setStudentSearch(""); setExpiresAtDate(""); fetchPkg(); }
-      else { const e = await res.json(); alert(e.message || "Gagal"); }
+      else { const e = await res.json().catch(() => ({})); alert(e.message || "Gagal"); }
     } catch { alert("Error"); } finally { setAddingStudent(false); }
   };
 
@@ -116,7 +116,7 @@ export default function PackageDetailPage() {
         body: JSON.stringify({ courseId: selectedCourseId, lessonLimit: Number(courseLessonLimit) || undefined }),
       });
       if (res.ok) { setShowAddCourse(false); setSelectedCourseId(""); setCourseLessonLimit(""); fetchPkg(); }
-      else { const e2 = await res.json(); alert(e2.message || "Gagal"); }
+      else { const e2 = await res.json().catch(() => ({})); alert(e2.message || "Gagal"); }
     } catch { alert("Error"); } finally { setAddingCourse(false); }
   };
 
@@ -135,7 +135,7 @@ export default function PackageDetailPage() {
         method: "PUT", credentials: "include", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: editName, description: editDesc || undefined, price: Number(editPrice) || 0, defaultLessonLimit: Number(editLimit) || 0 }),
       });
-      if (res.ok) { fetchPkg(); alert("Tersimpan!"); } else { const e2 = await res.json(); alert(e2.message || "Gagal"); }
+      if (res.ok) { fetchPkg(); alert("Tersimpan!"); } else { const e2 = await res.json().catch(() => ({})); alert(e2.message || "Gagal"); }
     } catch { alert("Error"); } finally { setSaving(false); }
   };
 

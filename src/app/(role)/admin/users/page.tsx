@@ -61,7 +61,7 @@ export default function AdminUsersPage() {
       if (activeTab !== "ALL") url.searchParams.set("role", activeTab);
       if (search) url.searchParams.set("search", search);
       const res = await fetch(url.toString(), { credentials: "include" });
-      if (res.ok) { const d = await res.json(); setUsers(d.users ?? []); }
+      if (res.ok) { const d = await res.json().catch(() => ({})); setUsers(d.users ?? []); }
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   }, [activeTab, search]);
@@ -104,7 +104,7 @@ export default function AdminUsersPage() {
         setToast({ message: `User berhasil ${isEditing ? "diperbarui" : "ditambahkan"}!`, type: "success" });
       }
       else { 
-        const err = await res.json(); 
+        const err = await res.json().catch(() => ({})); 
         setToast({ message: err.message || "Gagal menyimpan", type: "error" });
       }
     } catch { 
@@ -123,7 +123,7 @@ export default function AdminUsersPage() {
         setToast({ message: "User berhasil dihapus", type: "success" });
       }
       else { 
-        const err = await res.json(); 
+        const err = await res.json().catch(() => ({})); 
         setToast({ message: err.message || "Gagal menghapus", type: "error" });
       }
     } catch { 

@@ -68,7 +68,7 @@ export default async function MaterialsPage() {
 
   const allCourses = await getCourses(token);
   const teacherCourses = auth?.role === "TEACHER"
-    ? allCourses.filter((c) => c.teacherId === auth.uid)
+    ? allCourses.filter((c: any) => c.teachers?.some((t: any) => t.id === auth.uid))
     : allCourses;
 
   // Ambil semua lessons dari semua course milik teacher

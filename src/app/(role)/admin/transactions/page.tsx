@@ -39,7 +39,7 @@ export default function AdminTransactionsPage() {
       
       const res = await fetch(url.toString(), { credentials: "include" });
       if (res.ok) {
-        const d = await res.json();
+        const d = await res.json().catch(() => ({}));
         setTransactions(d.transactions ?? []);
       }
     } catch (e) {
@@ -67,7 +67,7 @@ export default function AdminTransactionsPage() {
         setToast({ message: status === "PAID" ? "Pembayaran disetujui! Akses materi diberikan." : "Pembayaran ditolak.", type: status === "PAID" ? "success" : "info" });
         setViewingProof(null);
       } else {
-        const err = await res.json();
+        const err = await res.json().catch(() => ({}));
         setToast({ message: err.message || "Gagal mengubah status", type: "error" });
       }
     } catch {
@@ -240,7 +240,7 @@ export default function AdminTransactionsPage() {
                 <button 
                   onClick={() => {
                     const tx = transactions.find(tx => tx.proofUrl === viewingProof);
-                    if (tx) updateStatus(tx.id, "FAILED", true);
+                    if (tx) updateStatus(tx.id, "FAILED", "Ditolak oleh admin");
                   }}
                   className="px-6 py-2.5 rounded-xl border border-rose-200 text-rose-600 font-bold hover:bg-rose-50 transition-colors"
                 >

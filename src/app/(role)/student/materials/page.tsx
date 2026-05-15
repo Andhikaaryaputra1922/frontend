@@ -18,14 +18,22 @@ type Lesson = {
   isLocked: boolean;
 };
 
-type CourseWithLessons = {
+type Chapter = {
   id: string;
   title: string;
+  description: string | null;
+  orderNumber: number;
   lessons: Lesson[];
+};
+
+type CourseWithChapters = {
+  id: string;
+  title: string;
+  chapters: Chapter[];
   lessonLimit: number | null;
 };
 
-async function getPackageGatedMaterials(token: string): Promise<CourseWithLessons[]> {
+async function getPackageGatedMaterials(token: string): Promise<CourseWithChapters[]> {
   const res = await fetch("http://localhost:4000/api/student/materials", {
     cache: "no-store",
     headers: { cookie: `${getAuthCookieName()}=${token}` },

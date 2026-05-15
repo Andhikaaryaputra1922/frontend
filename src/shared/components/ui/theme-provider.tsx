@@ -2,32 +2,33 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
-type Theme = "system" | "light" | "dark";
+type Theme = "light" | "dark";
 
 type ThemeContextValue = {
   theme: Theme;
   setTheme: (theme: Theme) => void;
+  toggleTheme: () => void;
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 function applyTheme(theme: Theme) {
   const root = document.documentElement;
-  if (theme === "system") {
-    root.removeAttribute("data-theme");
-    return;
-  }
+  root.classList.remove("light", "dark");
+  root.classList.add(theme);
+  
+  // Also set data-theme for any legacy CSS variables
   root.setAttribute("data-theme", theme);
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
-    if (typeof window === "undefined") return "system";
+    if (typeof window === "undefined") return "light";
     try {
       const stored = window.localStorage.getItem("haneenacademy.theme") as Theme | null;
-      if (stored === "light" || stored === "dark" || stored === "system") return stored;
+      if (stored === "light" || stored === "dark") return stored;
     } catch {}
-    return "system";
+    return "light";
   });
 
   useEffect(() => {
@@ -41,7 +42,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   };
 
-  const value = useMemo(() => ({ theme, setTheme }), [theme]);
+  const toggleTheme = () => {
+    const next = theme === "light" ? "dark" : "light";
+    setTheme(next);
+  };
+
+  const value = useMemo(() => ({ theme, setTheme, toggleTheme }), [theme]);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }

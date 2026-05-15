@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { getAuthCookieName, verifyUserJwt } from "@/shared/lib/auth/jwt";
 import { getRequestOrigin } from "@/shared/lib/origin";
 
-type Course = { id: string; title: string; teacher?: { id: string } | null };
+type Course = { id: string; title: string; teachers?: { id: string }[] };
 type Assignment = {
   id: string;
   title: string;
@@ -42,7 +42,7 @@ export async function getTeacherAssignmentsData() {
 
   const filteredCourses =
     auth?.role === "TEACHER"
-      ? courses.filter((c) => c.teacher?.id === auth.uid)
+      ? courses.filter((c) => c.teachers?.some(t => t.id === auth.uid))
       : courses;
 
   return { filteredCourses, assignments, baseUrl, token };

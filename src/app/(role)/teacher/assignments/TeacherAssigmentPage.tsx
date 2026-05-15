@@ -7,7 +7,7 @@ import Link from "next/link";
 import { AssignmentsClient } from "./assignments-client";
 
 // 1. Pastikan Type Definition ada
-type Course = { id: string; title: string; teacher?: { id: string } | null };
+type Course = { id: string; title: string; teachers?: { id: string }[] };
 type Assignment = {
   id: string;
   title: string;
@@ -51,7 +51,7 @@ export default async function TeacherAssignmentsPage() {
 
   const filteredCourses =
     auth?.role === "TEACHER"
-      ? courses.filter((c) => c.teacher?.id === auth.uid)
+      ? courses.filter((c) => c.teachers?.some(t => t.id === auth.uid))
       : courses;
 
   return (

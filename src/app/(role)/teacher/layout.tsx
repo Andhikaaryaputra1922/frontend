@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { getAuthCookieName, verifyUserJwt } from "@/shared/lib/auth/jwt";
 import TeacherSidebar from "@/features/users/components/layouts/TeacherSidebar";
+import TeacherHeader from "@/features/users/components/layouts/TeacherHeader";
 import { prisma } from "@/shared/lib/prisma";
 
 export default async function TeacherLayout({ children }: { children: React.ReactNode }) {
@@ -17,14 +18,21 @@ export default async function TeacherLayout({ children }: { children: React.Reac
   }
   
   return (
-    <div className="flex min-h-screen bg-[var(--base)]">
+    <div className="flex min-h-screen bg-[#FDFDFD]">
       <TeacherSidebar 
         name={userData?.name || "Teacher"} 
         role={userData?.role || "TEACHER"} 
         image={userData?.image || undefined}
       />
       <div className="flex-1 flex flex-col min-w-0">
-        {children}
+        <TeacherHeader 
+          name={userData?.name || "Teacher"} 
+          role={userData?.role || "TEACHER"} 
+          image={userData?.image || undefined}
+        />
+        <div className="flex-1">
+          {children}
+        </div>
       </div>
     </div>
   );

@@ -143,7 +143,7 @@ export function LearnClient({ courseId, lesson, initialProgress, syllabus }: Pro
               <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-10 pb-10 border-b border-white/5">
                  <div>
                     <div className="flex items-center gap-3 mb-3">
-                       <span className="px-3 py-1 rounded-full bg-[#8B0000] text-[9px] font-black uppercase tracking-widest text-white">Lesson Detail</span>
+                       <span className="px-3 py-1 rounded-full bg-[#1A2E44] text-[9px] font-black uppercase tracking-widest text-white">Lesson Detail</span>
                        {isCompleted && (
                           <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-[9px] font-black uppercase tracking-widest">
                              <CheckCircle size={10} /> Completed
@@ -202,8 +202,8 @@ export function LearnClient({ courseId, lesson, initialProgress, syllabus }: Pro
                           <p className="text-[9px] font-black uppercase tracking-widest text-white/20">Selanjutnya</p>
                           <p className="text-[10px] font-bold">Materi Berikutnya</p>
                        </div>
-                       <div className="h-10 w-10 rounded-full bg-[#8B0000] flex items-center justify-center group-hover:bg-red-800 transition-all">
-                          <ChevronRight size={20} className="text-white" />
+                       <div className="h-10 w-10 rounded-full bg-[#1A2E44] flex items-center justify-center group-hover:bg-[#E5B54F] transition-all">
+                          <ChevronRight size={20} className="text-white group-hover:text-[#1A2E44]" />
                        </div>
                     </Link>
                  ) : <div />}
@@ -231,7 +231,7 @@ export function LearnClient({ courseId, lesson, initialProgress, syllabus }: Pro
                               <Link 
                                  key={l.id} 
                                  href={`/student/courses/${courseId}/learn/${l.id}`}
-                                 className={`flex items-center gap-3 p-3 rounded-2xl transition-all ${isActive ? "bg-[#8B0000] text-white shadow-lg shadow-red-900/20" : "hover:bg-white/5 text-white/60"}`}
+                                 className={`flex items-center gap-3 p-3 rounded-2xl transition-all ${isActive ? "bg-[#1A2E44] text-white shadow-lg shadow-[#1A2E44]/20" : "hover:bg-white/5 text-white/60"}`}
                               >
                                  <div className={`shrink-0 h-8 w-8 rounded-xl flex items-center justify-center ${isActive ? "bg-white/20" : "bg-black/20"}`}>
                                     {l.type === 'VIDEO' ? <Play size={14} /> : <FileText size={14} />}

@@ -27,19 +27,25 @@ export default function PackageStorePage() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  const refreshData = () => {
+  const refreshData = async () => {
     setLoading(true);
-    fetch("/api/packages/store", { credentials: "include" })
-      .then((res) => res.json())
-      .then((storeData) => {
-        const mapped = (storeData.packages || []).map((p: any) => ({
-          ...p,
-          price: Number(p.price)
-        }));
-        setPackages(mapped);
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
+    try {
+      const res = await fetch("/api/packages/store", { credentials: "include" });
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      const storeData = await res.json().catch(() => ({}));
+      const mapped = (storeData.packages || []).map((p: any) => ({
+        ...p,
+        price: Number(p.price)
+      }));
+      setPackages(mapped);
+    } catch (err) {
+      console.error("Failed to load packages:", err);
+      setPackages([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -54,7 +60,7 @@ export default function PackageStorePage() {
       
       {/* ── BANNER HERO ────────────────────────────────────────── */}
       <section className="mx-auto max-w-[1400px] px-4 md:px-10 pt-6">
-        <div className="relative min-h-[400px] md:min-h-0 md:aspect-[3/1] w-full overflow-hidden rounded-[24px] md:rounded-[40px] shadow-2xl shadow-red-900/10 flex flex-col justify-center">
+        <div className="relative min-h-[400px] md:min-h-0 md:aspect-[3/1] w-full overflow-hidden rounded-[24px] md:rounded-[40px] shadow-2xl shadow-[#1A2E44]/10 flex flex-col justify-center">
           <img 
             src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=2000" 
             alt="Katalog Banner" 
@@ -100,26 +106,29 @@ export default function PackageStorePage() {
               const image = pkg.packageCourses[0]?.course.thumbnailUrl || fallbackImage;
 
               return (
-                <div key={pkg.id} className="group flex flex-col bg-white rounded-[32px] border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden">
+                <div 
+                  key={pkg.id} 
+                  className="group relative flex flex-col bg-[#FDFDFD] border-2 border-slate-100 rounded-[24px] p-4 sm:p-5 shadow-sm hover:shadow-xl transition-all duration-300"
+                >
                   
                   {/* Product Image */}
-                  <div className="relative aspect-[4/3] overflow-hidden">
-                    <img src={image} alt={pkg.name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-sm">
-                      <div className="text-blue-500"><FileText size={14} strokeWidth={3} /></div>
-                      <span className="text-[10px] font-black text-slate-600 uppercase tracking-wider">{totalLessons} Materi</span>
+                  <div className="relative w-full aspect-[16/9] sm:aspect-[3/2] overflow-hidden rounded-[16px] mb-5">
+                    <img src={image} alt={pkg.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-sm">
+                      <div className="text-[#1A2E44]"><FileText size={14} strokeWidth={3} /></div>
+                      <span className="text-[10px] font-black text-[#1A2E44] uppercase tracking-wider">{totalLessons} Materi</span>
                     </div>
                   </div>
 
                   {/* Content */}
-                  <div className="flex-1 p-6 flex flex-col">
-                    <h3 className="text-sm font-black text-[#1A2E44] line-clamp-2 leading-snug mb-3 uppercase tracking-tight">{pkg.name}</h3>
-                    <p className="text-[11px] font-medium text-slate-400 line-clamp-2 mb-6 flex-1">
+                  <div className="flex-1 flex flex-col">
+                    <h3 className="text-lg sm:text-xl font-black text-[#1A2E44] leading-tight mb-3 uppercase tracking-tight line-clamp-2">{pkg.name}</h3>
+                    <p className="text-[13px] font-medium text-slate-600 line-clamp-3 mb-6 flex-1 leading-relaxed">
                       {pkg.description || `Dapatkan akses eksklusif ke program ${pkg.name}.`}
                     </p>
                     
                     {/* Pricing */}
-                    <div className="flex flex-col gap-1 mb-6">
+                    <div className="flex flex-wrap items-end justify-between gap-2 mb-5">
                       {isFree ? (
                         <>
                           <div className="flex items-center gap-2 h-4" />
@@ -127,13 +136,17 @@ export default function PackageStorePage() {
                         </>
                       ) : (
                         <>
-                          <div className="flex items-center gap-2">
-                             <span className="bg-green-100 text-green-600 text-[9px] font-black px-2 py-0.5 rounded-md">
-                                {discountPercent}%
-                             </span>
-                             <span className="text-[11px] font-bold text-slate-300 line-through">{formatPrice(originalPrice)}</span>
+                          <div className="flex flex-col gap-0.5 shrink-0">
+                             {discountPercent > 0 && (
+                               <div className="flex items-center gap-1.5">
+                                 <span className="bg-[#16a34a] text-white text-[9px] font-black px-1.5 py-0.5 rounded-md tracking-wider">
+                                    {discountPercent}%
+                                 </span>
+                                 <span className="text-[11px] font-bold text-slate-400 line-through italic">{formatPrice(originalPrice)}</span>
+                               </div>
+                             )}
                           </div>
-                          <p className="text-xl font-black text-[#8B0000]">{formatPrice(pkg.price)}</p>
+                          <p className="text-xl sm:text-2xl font-black text-[#1A2E44] tracking-tight whitespace-nowrap">{formatPrice(pkg.price)}</p>
                         </>
                       )}
                     </div>
@@ -141,7 +154,7 @@ export default function PackageStorePage() {
                     {/* Action */}
                     <Link 
                       href={`/student/packages/${pkg.id}`}
-                      className="w-full py-3.5 rounded-2xl bg-[#8B0000] text-center text-[11px] font-black text-white uppercase tracking-[0.2em] shadow-lg shadow-red-900/20 hover:bg-red-800 transition-all active:scale-[0.98]"
+                      className="w-full py-4 rounded-xl bg-[#1A2E44] text-center text-[13px] font-black text-white hover:bg-[#E5B54F] hover:text-[#1A2E44] transition-all active:scale-[0.98] shadow-md shadow-[#1A2E44]/10"
                     >
                       Selengkapnya
                     </Link>
