@@ -10,8 +10,8 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#E5B54F] focus:ring-offset-2 ${
-        isDark ? "bg-[#1A2E44] border border-white/10" : "bg-slate-200 border border-slate-300"
+      className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:ring-offset-2 ${
+        isDark ? "bg-[#0B213F] border border-white/10" : "bg-slate-200 border border-slate-300"
       }`}
       role="switch"
       aria-checked={isDark}
@@ -23,9 +23,9 @@ export function ThemeToggle() {
         }`}
       >
         {isDark ? (
-          <Moon size={12} className="text-[#1A2E44]" />
+          <Moon size={12} className="text-[#0B213F]" />
         ) : (
-          <Sun size={12} className="text-[#E5B54F]" />
+          <Sun size={12} className="text-[#D4AF37]" />
         )}
       </span>
     </button>

@@ -2,6 +2,7 @@ import { Outfit, Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import { ThemeProvider } from "@/shared/components/ui/theme-provider";
 import { Toaster } from "sonner";
+import { LegalModalProvider } from "@/shared/components/providers/LegalModalProvider";
 
 import "./globals.css";
 
@@ -59,11 +60,12 @@ export default function RootLayout({
         />
 
         <ThemeProvider>
-
-          {/* MAIN CONTENT */}
-          <div className="flex-1">
-            {children}
-          </div>
+          <LegalModalProvider>
+            {/* MAIN CONTENT */}
+            <div className="flex-1">
+              {children}
+            </div>
+          </LegalModalProvider>
 
           {/* GLOBAL TOAST */}
           <Toaster

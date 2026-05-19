@@ -18,17 +18,21 @@ type Quiz = {
   course: Course;
 };
 
+type Batch = { id: string; name: string; isActive: boolean; courseId: string };
+
 type Props = {
   basePath: "/teacher" | "/admin";
   courses: Course[];
+  batches: Batch[];
   quizzes: Quiz[];
 };
 
-export function QuizzesManager({ basePath, courses, quizzes }: Props) {
+export function QuizzesManager({ basePath, courses, batches, quizzes }: Props) {
   const router = useRouter();
   const courseOptions = useMemo(() => courses, [courses]);
 
   const [courseId, setCourseId] = useState(courseOptions[0]?.id ?? "");
+  const [batchId, setBatchId] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [passScore, setPassScore] = useState(70);
@@ -45,6 +49,7 @@ export function QuizzesManager({ basePath, courses, quizzes }: Props) {
     try {
       const payload = {
         courseId,
+        batchId: batchId || undefined,
         title,
         description: description.trim() ? description.trim() : undefined,
         passScore,
@@ -109,6 +114,24 @@ export function QuizzesManager({ basePath, courses, quizzes }: Props) {
               {courseOptions.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.title}
+                </option>
+              ))}
+            </select>
+          </label>
+          
+          <label className="block">
+            <span className="mb-2 block text-xs font-semibold text-[var(--muted)]">Batch / Angkatan (Opsional)</span>
+            <select
+              className="w-full rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/15"
+              value={batchId}
+              onChange={(e) => setBatchId(e.target.value)}
+            >
+              <option value="">-- Semua Siswa --</option>
+              {batches
+                .filter(b => b.courseId === courseId)
+                .map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.name} {!b.isActive ? "(Tidak Aktif)" : ""}
                 </option>
               ))}
             </select>

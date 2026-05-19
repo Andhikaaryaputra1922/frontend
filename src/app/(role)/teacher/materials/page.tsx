@@ -1,8 +1,8 @@
 import { cookies } from "next/headers";
 import { getAuthCookieName, verifyUserJwt } from "@/shared/lib/auth/jwt";
-import BackButton from "@/shared/components/ui/BackButton";
-import Link from "next/link";
-import { MaterialsClient } from "./materials-client";
+import { RecordingsClient } from "./materials-client";
+import { getRequestOrigin } from "@/shared/lib/origin";
+import TeacherPageLayout from "@/features/users/components/layouts/TeacherPageLayout";
 
 type Course = { id: string; title: string; teacherId: string };
 type Lesson = {
@@ -33,13 +33,9 @@ async function getLessons(courseId: string, token: string): Promise<Lesson[]> {
     headers: { cookie: `${getAuthCookieName()}=${token}` },
   });
   
-  if (!response.ok) {
-    console.error(`[getLessons] Failed to fetch chapters for ${courseId}: ${response.status} ${response.statusText}`);
-    return [];
-  }
+  if (!response.ok) return [];
   
   const data = (await response.json()) as { chapters: any[] };
-  console.log(`[getLessons] Fetched ${data.chapters?.length || 0} chapters for course ${courseId}`);
   
   const allLessons: Lesson[] = [];
   data.chapters?.forEach((ch) => {
@@ -57,21 +53,34 @@ async function getLessons(courseId: string, token: string): Promise<Lesson[]> {
     });
   });
   
-  console.log(`[getLessons] Total flattened lessons for ${courseId}: ${allLessons.length}`);
   return allLessons;
 }
 
-export default async function MaterialsPage() {
+async function getBatches(baseUrl: string, token: string, courseIds: string[]): Promise<any[]> {
+  if (!courseIds.length) return [];
+  const results = await Promise.all(
+    courseIds.map((cId) =>
+      fetch(`${baseUrl}/api/batches?courseId=${cId}`, {
+        cache: "no-store",
+        headers: { cookie: `${getAuthCookieName()}=${token}` },
+      }).then((r) => r.ok ? r.json().then((d: { batches: any[] }) => (d.batches ?? []).map(b => ({ ...b, courseId: cId }))) : [])
+    )
+  );
+  return results.flat();
+}
+
+export default async function RecordingsPage() {
   const cookieStore = await cookies();
   const token = cookieStore.get(getAuthCookieName())?.value ?? "";
   const auth = token ? await verifyUserJwt(token).catch(() => null) : null;
 
+  const baseUrl = await getRequestOrigin();
   const allCourses = await getCourses(token);
   const teacherCourses = auth?.role === "TEACHER"
     ? allCourses.filter((c: any) => c.teachers?.some((t: any) => t.id === auth.uid))
     : allCourses;
+  const batches = await getBatches(baseUrl, token, teacherCourses.map((c) => c.id));
 
-  // Ambil semua lessons dari semua course milik teacher
   const lessonsPerCourse = await Promise.all(
     teacherCourses.map(async (c) => ({
       course: c,
@@ -80,37 +89,19 @@ export default async function MaterialsPage() {
   );
 
   return (
-    <main className="min-h-screen bg-[var(--base)] px-6 py-10">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h1 className="text-3xl font-black tracking-tight text-[var(--text)] md:text-4xl">
-              Manajemen Materi
-            </h1>
-            <p className="mt-2 text-sm text-[var(--muted)]">
-              Upload rekaman dan materi per kelas ke dalam bab kurikulum.
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <BackButton />
-            <Link
-              href="/teacher"
-              className="inline-flex rounded-full border border-[var(--border)] bg-[var(--base)]/70 px-5 py-3 text-sm font-semibold text-[var(--text)] hover:bg-black/5"
-            >
-              Dashboard
-            </Link>
-          </div>
-        </div>
-
-        <MaterialsClient
-          courses={teacherCourses.map((c) => ({ id: c.id, title: c.title }))}
-          lessonsPerCourse={lessonsPerCourse.map((lpc) => ({
-            courseId: lpc.course.id,
-            courseTitle: lpc.course.title,
-            lessons: lpc.lessons,
-          }))}
-        />
-      </div>
-    </main>
+    <TeacherPageLayout
+      title="Rekaman Kelas"
+      subtitle="Upload rekaman pertemuan kelas agar siswa bisa review ulang materi yang terlewat."
+    >
+      <RecordingsClient
+        courses={teacherCourses.map((c) => ({ id: c.id, title: c.title }))}
+        batches={batches}
+        lessonsPerCourse={lessonsPerCourse.map((lpc) => ({
+          courseId: lpc.course.id,
+          courseTitle: lpc.course.title,
+          lessons: lpc.lessons,
+        }))}
+      />
+    </TeacherPageLayout>
   );
 }

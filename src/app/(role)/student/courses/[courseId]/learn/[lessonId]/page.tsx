@@ -29,7 +29,7 @@ export default async function StudentLearnPage({ params }: { params: Promise<{ c
   // If lessonId is "start", we should find the first lesson of the course
   let targetLessonId = lessonId;
   const syllabus = await getCourseSyllabus(courseId, token);
-  console.log(`[StudentLearnPage] Syllabus for course ${courseId}:`, JSON.stringify(syllabus, null, 2));
+
 
   if (lessonId === "start") {
     let firstLesson = null;
@@ -41,10 +41,10 @@ export default async function StudentLearnPage({ params }: { params: Promise<{ c
     }
 
     if (firstLesson) {
-      console.log(`[StudentLearnPage] Redirecting to first lesson: ${firstLesson.id}`);
+
       redirect(`/student/courses/${courseId}/learn/${firstLesson.id}`);
     } else {
-       console.log(`[StudentLearnPage] No first lesson found. Chapters: ${syllabus.chapters?.length}`);
+
        return <div className="p-20 text-center">Belum ada materi untuk kursus ini.</div>;
     }
   }

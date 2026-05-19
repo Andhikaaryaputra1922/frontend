@@ -101,7 +101,7 @@ export function LearnClient({ courseId, lesson, initialProgress, syllabus }: Pro
                  <ArrowLeft size={20} />
               </Link>
               <div className="hidden md:block">
-                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#E5B54F]">Learning Mode</p>
+                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#D4AF37]">Learning Mode</p>
                  <h1 className="text-sm font-black truncate max-w-[400px]">{lesson.title}</h1>
               </div>
            </div>
@@ -143,7 +143,7 @@ export function LearnClient({ courseId, lesson, initialProgress, syllabus }: Pro
               <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-10 pb-10 border-b border-white/5">
                  <div>
                     <div className="flex items-center gap-3 mb-3">
-                       <span className="px-3 py-1 rounded-full bg-[#1A2E44] text-[9px] font-black uppercase tracking-widest text-white">Lesson Detail</span>
+                       <span className="px-3 py-1 rounded-full bg-[#0B213F] text-[9px] font-black uppercase tracking-widest text-white">Lesson Detail</span>
                        {isCompleted && (
                           <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-[9px] font-black uppercase tracking-widest">
                              <CheckCircle size={10} /> Completed
@@ -158,7 +158,7 @@ export function LearnClient({ courseId, lesson, initialProgress, syllabus }: Pro
                     {!isCompleted && (
                        <button 
                         onClick={() => saveProgress(true)}
-                        className="flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-white text-black text-[10px] font-black uppercase tracking-widest hover:bg-[#E5B54F] transition-all shadow-xl shadow-white/5"
+                        className="flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-white text-black text-[10px] font-black uppercase tracking-widest hover:bg-[#D4AF37] transition-all shadow-xl shadow-white/5"
                        >
                           Tandai Selesai
                        </button>
@@ -202,8 +202,8 @@ export function LearnClient({ courseId, lesson, initialProgress, syllabus }: Pro
                           <p className="text-[9px] font-black uppercase tracking-widest text-white/20">Selanjutnya</p>
                           <p className="text-[10px] font-bold">Materi Berikutnya</p>
                        </div>
-                       <div className="h-10 w-10 rounded-full bg-[#1A2E44] flex items-center justify-center group-hover:bg-[#E5B54F] transition-all">
-                          <ChevronRight size={20} className="text-white group-hover:text-[#1A2E44]" />
+                       <div className="h-10 w-10 rounded-full bg-[#0B213F] flex items-center justify-center group-hover:bg-[#D4AF37] transition-all">
+                          <ChevronRight size={20} className="text-white group-hover:text-[#0B213F]" />
                        </div>
                     </Link>
                  ) : <div />}
@@ -216,7 +216,7 @@ export function LearnClient({ courseId, lesson, initialProgress, syllabus }: Pro
       <aside className={`fixed top-0 right-0 h-screen w-full lg:w-[350px] bg-[#141414] border-l border-white/5 z-40 transition-transform duration-500 ease-in-out ${sidebarOpen ? "translate-x-0" : "translate-x-full"}`}>
          <div className="flex flex-col h-full">
             <header className="p-6 border-b border-white/5 flex items-center justify-between">
-               <h3 className="text-sm font-black uppercase tracking-[0.2em] text-[#E5B54F]">Daftar Materi</h3>
+               <h3 className="text-sm font-black uppercase tracking-[0.2em] text-[#D4AF37]">Daftar Materi</h3>
                <button className="lg:hidden" onClick={() => setSidebarOpen(false)}><X size={20} /></button>
             </header>
 
@@ -231,7 +231,7 @@ export function LearnClient({ courseId, lesson, initialProgress, syllabus }: Pro
                               <Link 
                                  key={l.id} 
                                  href={`/student/courses/${courseId}/learn/${l.id}`}
-                                 className={`flex items-center gap-3 p-3 rounded-2xl transition-all ${isActive ? "bg-[#1A2E44] text-white shadow-lg shadow-[#1A2E44]/20" : "hover:bg-white/5 text-white/60"}`}
+                                 className={`flex items-center gap-3 p-3 rounded-2xl transition-all ${isActive ? "bg-[#0B213F] text-white shadow-lg shadow-[#0B213F]/20" : "hover:bg-white/5 text-white/60"}`}
                               >
                                  <div className={`shrink-0 h-8 w-8 rounded-xl flex items-center justify-center ${isActive ? "bg-white/20" : "bg-black/20"}`}>
                                     {l.type === 'VIDEO' ? <Play size={14} /> : <FileText size={14} />}
@@ -254,10 +254,10 @@ export function LearnClient({ courseId, lesson, initialProgress, syllabus }: Pro
             <div className="p-6 border-t border-white/5 bg-black/40">
                <div className="flex items-center justify-between mb-4">
                   <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Total Progres</p>
-                  <p className="text-[10px] font-black text-[#E5B54F]">75%</p>
+                  <p className="text-[10px] font-black text-[#D4AF37]">75%</p>
                </div>
                <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                  <div className="h-full bg-[#E5B54F] w-3/4 rounded-full" />
+                  <div className="h-full bg-[#D4AF37] w-3/4 rounded-full" />
                </div>
             </div>
          </div>

@@ -5,10 +5,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 
+import Link from "next/link";
 import {
   Trash2,
   FileUp,
-  Link,
+  Link as LinkIcon,
   FileText,
   Video,
   Image as ImageIcon,
@@ -16,11 +17,19 @@ import {
   AlertTriangle,
   CheckCircle2,
   X,
+  Edit3,
 } from "lucide-react";
 
 type Course = {
   id: string;
   title: string;
+};
+
+type Batch = {
+  id: string;
+  name: string;
+  courseId: string;
+  isActive: boolean;
 };
 
 type Assignment = {
@@ -33,27 +42,34 @@ type Assignment = {
     id: string;
     title: string;
   };
+  batch?: { id: string; name: string } | null;
   attachmentUrl?: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 type Props = {
   baseUrl: string;
   token: string;
   filteredCourses: Course[];
+  batches: Batch[];
   assignments: Assignment[];
 };
 
 export function AssignmentsClient({
   filteredCourses,
+  batches,
   assignments,
 }: Props) {
   const [file, setFile] = useState<File | null>(null);
   const [linkUrl, setLinkUrl] = useState("");
+  const [batchId, setBatchId] = useState("");
   const [loading, setLoading] = useState(false);
   const [listLoading, setListLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   
-  const [localAssignments, setLocalAssignments] =
-    useState(assignments);
+  const [localAssignments, setLocalAssignments] = useState(assignments);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const refreshAssignments = async () => {
     setListLoading(true);
@@ -69,11 +85,9 @@ export function AssignmentsClient({
     }
   };
 
-  const [isDeleteModalOpen, setIsDeleteModalOpen] =
-    useState(false);
-
-  const [selectedId, setSelectedId] =
-    useState<string | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const [showSuccessToast, setShowSuccessToast] =
     useState(false);
@@ -88,17 +102,20 @@ export function AssignmentsClient({
 
   // Hindari setState sinkron di useEffect (kena rule react-hooks/set-state-in-effect).
   // Ambil draft sekali via lazy initializer.
-  const [newAssignment, setNewAssignment] = useState(() => {
-    if (typeof window === "undefined") return defaultNewAssignment;
+  const [newAssignment, setNewAssignment] = useState(defaultNewAssignment);
+
+  useEffect(() => {
+    setIsMounted(true);
     const saved = localStorage.getItem("assignmentDraft");
-    if (!saved) return defaultNewAssignment;
-    try {
-      const parsed = JSON.parse(saved) as Partial<typeof defaultNewAssignment>;
-      return { ...defaultNewAssignment, ...parsed };
-    } catch {
-      return defaultNewAssignment;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as Partial<typeof defaultNewAssignment>;
+        setNewAssignment((prev) => ({ ...prev, ...parsed }));
+      } catch (e) {
+        console.error("Failed to load draft", e);
+      }
     }
-  });
+  }, []);
 
   /*
   =========================
@@ -107,11 +124,13 @@ export function AssignmentsClient({
   */
 
   useEffect(() => {
-    localStorage.setItem(
-      "assignmentDraft",
-      JSON.stringify(newAssignment)
-    );
-  }, [newAssignment]);
+    if (isMounted) {
+      localStorage.setItem(
+        "assignmentDraft",
+        JSON.stringify(newAssignment)
+      );
+    }
+  }, [newAssignment, isMounted]);
 
   /*
   =========================
@@ -174,108 +193,78 @@ export function AssignmentsClient({
   */
 
   const handleCreateAssignment = async () => {
-    if (
-      !newAssignment.courseId ||
-      !newAssignment.title
-    ) {
-      toast.error(
-        "Judul dan kursus wajib diisi"
-      );
-
+    if (!newAssignment.courseId || !newAssignment.title || !newAssignment.description || !newAssignment.dueDate) {
+      toast.error("Semua field wajib diisi (Judul, Kursus, Deskripsi, Deadline)");
       return;
     }
 
     setLoading(true);
-
-    const loadingToast = toast.loading(
-      "Mengupload tugas..."
-    );
+    const loadingToast = toast.loading(editingId ? "Memperbarui tugas..." : "Mengupload tugas...");
 
     try {
       const formData = new FormData();
+      formData.append("title", newAssignment.title);
+      formData.append("description", newAssignment.description);
+      formData.append("dueDate", newAssignment.dueDate);
+      formData.append("maxScore", String(newAssignment.maxScore));
+      formData.append("courseId", newAssignment.courseId);
+      if (batchId) formData.append("batchId", batchId);
 
-      formData.append(
-        "title",
-        newAssignment.title
-      );
-
-      formData.append(
-        "description",
-        newAssignment.description
-      );
-
-      formData.append(
-        "dueDate",
-        newAssignment.dueDate
-      );
-
-      formData.append(
-        "maxScore",
-        String(newAssignment.maxScore)
-      );
-
-      formData.append(
-        "courseId",
-        newAssignment.courseId
-      );
-
-      if (file) {
-        formData.append("file", file);
-      }
-
-      if (linkUrl) {
-        formData.append("linkUrl", linkUrl);
-      }
+      if (file) formData.append("file", file);
+      if (linkUrl) formData.append("linkUrl", linkUrl);
 
       const response = await fetch(
-        "/api/assignments",
+        editingId ? `/api/assignments/${editingId}` : "/api/assignments",
         {
-          method: "POST",
+          method: editingId ? "PATCH" : "POST",
           body: formData,
         }
       );
 
+      const data = await response.json().catch(() => ({}));
+
       if (response.ok) {
         toast.dismiss(loadingToast);
-
-        toast.success(
-          "Tugas berhasil diterbitkan!"
-        );
-
-        localStorage.removeItem(
-          "assignmentDraft"
-        );
-
-        setNewAssignment({
-          title: "",
-          description: "",
-          dueDate: "",
-          maxScore: 100,
-          courseId: "",
-        });
-
+        toast.success(editingId ? "Tugas berhasil diperbarui!" : "Tugas berhasil diterbitkan!");
+        localStorage.removeItem("assignmentDraft");
+        setNewAssignment(defaultNewAssignment);
         setFile(null);
-
         setLinkUrl("");
-
-        // Refresh list tanpa reload halaman (lebih cepat dan tidak bikin state hilang)
+        setEditingId(null);
+        setIsEditModalOpen(false);
         await refreshAssignments();
       } else {
         toast.dismiss(loadingToast);
-
-        toast.error(
-          "Gagal membuat assignment"
-        );
+        toast.error(data.message || "Gagal menyimpan assignment");
       }
     } catch (error) {
       toast.dismiss(loadingToast);
-
-      toast.error(
-        "Terjadi kesalahan sistem"
-      );
+      toast.error("Terjadi kesalahan sistem");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEditClick = (item: Assignment) => {
+    setEditingId(item.id);
+    setNewAssignment({
+      title: item.title,
+      description: item.description,
+      dueDate: item.dueDate.split("T")[0],
+      maxScore: item.maxScore,
+      courseId: item.course.id,
+    });
+    setLinkUrl("");
+    setFile(null);
+    setIsEditModalOpen(true);
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setIsEditModalOpen(false);
+    setNewAssignment(defaultNewAssignment);
+    setFile(null);
+    setLinkUrl("");
   };
 
   /*
@@ -334,257 +323,207 @@ export function AssignmentsClient({
     }
   };
 
+  const renderFormFields = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      {/* LEFT */}
+      <div className="space-y-5">
+        <div>
+          <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">
+            Judul Tugas
+          </label>
+          <input
+            type="text"
+            name="title"
+            value={newAssignment.title}
+            onChange={handleInputChange}
+            placeholder="Contoh: Tugas React Dasar"
+            className="mt-2 block w-full rounded-2xl border-gray-200 bg-gray-50/50 p-4 focus:ring-2 focus:ring-indigo-500 transition-all"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">
+            Mata Kuliah
+          </label>
+          <select
+            name="courseId"
+            value={newAssignment.courseId}
+            onChange={(e) => {
+              handleInputChange(e);
+              setBatchId(""); // Reset batch saat kursus berubah
+            }}
+            className="mt-2 block w-full rounded-2xl border-gray-200 bg-gray-50/50 p-4 focus:ring-2 focus:ring-indigo-500 transition-all"
+          >
+            <option value="">-- Pilih Mata Kuliah --</option>
+            {filteredCourses.map((course) => (
+              <option key={course.id} value={course.id}>
+                {course.title}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Batch Selector - muncul setelah kursus dipilih */}
+        {isMounted && newAssignment.courseId && (
+          <div>
+            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">
+              Batch / Angkatan
+            </label>
+            <select
+              value={batchId}
+              onChange={(e) => setBatchId(e.target.value)}
+              className="mt-2 block w-full rounded-2xl border-gray-200 bg-gray-50/50 p-4 focus:ring-2 focus:ring-indigo-500 transition-all"
+            >
+              <option value="">-- Semua Siswa (Tanpa Batch) --</option>
+              {batches
+                .filter((b) => b.courseId === newAssignment.courseId)
+                .map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name} {!b.isActive ? "(Tidak Aktif)" : ""}
+                  </option>
+                ))}
+            </select>
+            <p className="mt-1 text-xs text-gray-400">
+              Pilih batch agar tugas hanya terlihat oleh siswa angkatan tersebut.
+            </p>
+          </div>
+        )}
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">
+              Deadline
+            </label>
+            <input
+              type="date"
+              name="dueDate"
+              value={newAssignment.dueDate}
+              onChange={handleInputChange}
+              className="mt-2 block w-full rounded-2xl border-gray-200 bg-gray-50/50 p-4"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">
+              Max Score
+            </label>
+            <input
+              type="number"
+              name="maxScore"
+              value={newAssignment.maxScore}
+              onChange={handleInputChange}
+              className="mt-2 block w-full rounded-2xl border-gray-200 bg-gray-50/50 p-4"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">
+            Deskripsi
+          </label>
+          <textarea
+            rows={6}
+            name="description"
+            value={newAssignment.description}
+            onChange={handleInputChange}
+            placeholder="Instruksi assignment..."
+            className="mt-2 block w-full rounded-2xl border-gray-200 bg-gray-50/50 p-4"
+          />
+        </div>
+      </div>
+
+      {/* RIGHT */}
+      <div className="space-y-5">
+        {/* DRAG DROP */}
+        <div
+          {...getRootProps()}
+          className={`
+            border-2 border-dashed rounded-[2rem]
+            p-10 transition-all cursor-pointer
+            ${
+              isDragActive
+                ? "border-indigo-500 bg-indigo-50 scale-[1.02]"
+                : "border-gray-200 hover:border-indigo-300"
+            }
+          `}
+        >
+          <input {...getInputProps()} />
+          <div className="flex flex-col items-center justify-center text-center">
+            <div className="w-20 h-20 rounded-full bg-indigo-50 flex items-center justify-center mb-5">
+              <FileUp className="text-indigo-500" size={32} />
+            </div>
+            <h3 className="font-black text-lg text-gray-900">Drag & Drop File</h3>
+            <p className="text-sm text-gray-400 mt-2">PDF, Video, atau Gambar</p>
+            {file && (
+              <div className="mt-5 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-sm font-bold">
+                {file.name}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* LINK */}
+        <div className="relative">
+          <div className="absolute inset-y-0 left-4 flex items-center text-gray-400">
+            <LinkIcon size={16} />
+          </div>
+          <input
+            type="url"
+            placeholder="Atau tempel URL..."
+            value={linkUrl}
+            onChange={(e) => setLinkUrl(e.target.value)}
+            className="w-full pl-12 rounded-2xl border-gray-200 bg-gray-50/50 p-4"
+          />
+        </div>
+
+        {/* PREVIEW */}
+        {previewUrl && (
+          <div className="rounded-[2rem] overflow-hidden border border-gray-200 bg-white shadow-sm">
+            {file?.type.startsWith("image/") && (
+              <img src={previewUrl} alt="Preview" className="w-full max-h-[350px] object-cover" />
+            )}
+            {file?.type.startsWith("video/") && (
+              <video controls className="w-full">
+                <source src={previewUrl} type={file.type} />
+              </video>
+            )}
+            {file?.type === "application/pdf" && (
+              <iframe src={previewUrl} className="w-full h-[500px]" />
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <>
       <div className="space-y-10">
-
         {/* ========================= */}
-        {/* FORM */}
+        {/* STATIC CREATE FORM */}
         {/* ========================= */}
-
         <section className="bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm">
-
           <div className="flex items-center gap-3 mb-8">
-
             <div className="p-3 rounded-2xl bg-indigo-50 text-indigo-600">
               <Plus size={20} />
             </div>
-
             <div>
-              <h2 className="text-2xl font-black text-gray-900">
-                Buat Assignment
-              </h2>
-
-              <p className="text-sm text-gray-400 mt-1">
-                Upload materi dan instruksi tugas
-              </p>
-            </div>
-
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-
-            {/* LEFT */}
-
-            <div className="space-y-5">
-
-              <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">
-                  Judul Tugas
-                </label>
-
-                <input
-                  type="text"
-                  name="title"
-                  value={newAssignment.title}
-                  onChange={handleInputChange}
-                  placeholder="Contoh: Tugas React Dasar"
-                  className="mt-2 block w-full rounded-2xl border-gray-200 bg-gray-50/50 p-4 focus:ring-2 focus:ring-indigo-500 transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">
-                  Mata Kuliah
-                </label>
-
-                <select
-                  name="courseId"
-                  value={newAssignment.courseId}
-                  onChange={handleInputChange}
-                  className="mt-2 block w-full rounded-2xl border-gray-200 bg-gray-50/50 p-4 focus:ring-2 focus:ring-indigo-500 transition-all"
-                >
-                  <option value="">
-                    -- Pilih Mata Kuliah --
-                  </option>
-
-                  {filteredCourses.map(
-                    (course) => (
-                      <option
-                        key={course.id}
-                        value={course.id}
-                      >
-                        {course.title}
-                      </option>
-                    )
-                  )}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-
-                <div>
-                  <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">
-                    Deadline
-                  </label>
-
-                  <input
-                    type="date"
-                    name="dueDate"
-                    value={newAssignment.dueDate}
-                    onChange={handleInputChange}
-                    className="mt-2 block w-full rounded-2xl border-gray-200 bg-gray-50/50 p-4"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">
-                    Max Score
-                  </label>
-
-                  <input
-                    type="number"
-                    name="maxScore"
-                    value={newAssignment.maxScore}
-                    onChange={handleInputChange}
-                    className="mt-2 block w-full rounded-2xl border-gray-200 bg-gray-50/50 p-4"
-                  />
-                </div>
-
-              </div>
-
-              <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">
-                  Deskripsi
-                </label>
-
-                <textarea
-                  rows={6}
-                  name="description"
-                  value={newAssignment.description}
-                  onChange={handleInputChange}
-                  placeholder="Instruksi assignment..."
-                  className="mt-2 block w-full rounded-2xl border-gray-200 bg-gray-50/50 p-4"
-                />
-              </div>
-
-            </div>
-
-            {/* RIGHT */}
-
-            <div className="space-y-5">
-
-              {/* DRAG DROP */}
-
-              <div
-                {...getRootProps()}
-                className={`
-                  border-2 border-dashed rounded-[2rem]
-                  p-10 transition-all cursor-pointer
-                  ${
-                    isDragActive
-                      ? "border-indigo-500 bg-indigo-50 scale-[1.02]"
-                      : "border-gray-200 hover:border-indigo-300"
-                  }
-                `}
-              >
-
-                <input {...getInputProps()} />
-
-                <div className="flex flex-col items-center justify-center text-center">
-
-                  <div className="w-20 h-20 rounded-full bg-indigo-50 flex items-center justify-center mb-5">
-                    <FileUp
-                      className="text-indigo-500"
-                      size={32}
-                    />
-                  </div>
-
-                  <h3 className="font-black text-lg text-gray-900">
-                    Drag & Drop File
-                  </h3>
-
-                  <p className="text-sm text-gray-400 mt-2">
-                    PDF, Video, atau Gambar
-                  </p>
-
-                  {file && (
-                    <div className="mt-5 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-sm font-bold">
-                      {file.name}
-                    </div>
-                  )}
-
-                </div>
-              </div>
-
-              {/* LINK */}
-
-              <div className="relative">
-
-                <div className="absolute inset-y-0 left-4 flex items-center text-gray-400">
-                  <Link size={16} />
-                </div>
-
-                <input
-                  type="url"
-                  placeholder="Atau tempel URL..."
-                  value={linkUrl}
-                  onChange={(e) =>
-                    setLinkUrl(e.target.value)
-                  }
-                  className="w-full pl-12 rounded-2xl border-gray-200 bg-gray-50/50 p-4"
-                />
-              </div>
-
-              {/* PREVIEW */}
-
-              {previewUrl && (
-                <div className="rounded-[2rem] overflow-hidden border border-gray-200 bg-white shadow-sm">
-
-                  {file?.type.startsWith(
-                    "image/"
-                  ) && (
-                    <img
-                      src={previewUrl}
-                      alt="Preview"
-                      className="w-full max-h-[350px] object-cover"
-                    />
-                  )}
-
-                  {file?.type.startsWith(
-                    "video/"
-                  ) && (
-                    <video
-                      controls
-                      className="w-full"
-                    >
-                      <source
-                        src={previewUrl}
-                        type={file.type}
-                      />
-                    </video>
-                  )}
-
-                  {file?.type ===
-                    "application/pdf" && (
-                    <iframe
-                      src={previewUrl}
-                      className="w-full h-[500px]"
-                    />
-                  )}
-
-                </div>
-              )}
-
+              <h2 className="text-2xl font-black text-gray-900">Buat Assignment Baru</h2>
+              <p className="text-sm text-gray-400 mt-1">Upload materi dan instruksi tugas</p>
             </div>
           </div>
 
-          {/* BUTTON */}
+          {renderFormFields()}
 
           <div className="mt-10 flex justify-end">
-
             <button
               onClick={handleCreateAssignment}
               disabled={loading}
               className="px-8 py-4 bg-black text-white rounded-full font-bold hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
             >
-              {loading
-                ? "Memproses..."
-                : "Terbitkan Assignment"}
+              {loading ? "Memproses..." : "Terbitkan Assignment"}
             </button>
-
           </div>
-
         </section>
 
         {/* ========================= */}
@@ -645,8 +584,10 @@ export function AssignmentsClient({
 
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500 opacity-0 group-hover:opacity-100 transition-all" />
 
-                <div className="flex items-center gap-4">
-
+                <Link
+                  href={`/teacher/assignments/${item.id}`}
+                  className="flex flex-1 items-center gap-4 cursor-pointer"
+                >
                   <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 group-hover:bg-indigo-50 group-hover:text-indigo-500 transition-all">
 
                     {item.attachmentUrl?.includes(
@@ -665,41 +606,57 @@ export function AssignmentsClient({
 
                   <div>
 
-                    <h4 className="font-black text-gray-900">
+                    <h4 className="font-black text-gray-900 group-hover:text-indigo-600 transition-colors">
                       {item.title}
                     </h4>
 
-                    <div className="flex items-center gap-3 mt-2">
-
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2">
                       <span className="text-xs font-bold px-3 py-1 bg-gray-100 rounded-full text-gray-500">
                         {item.course.title}
                       </span>
 
-                      <span className="text-xs text-gray-400">
-                        Deadline{" "}
-                        {new Date(
-                          item.dueDate
-                        ).toLocaleDateString(
-                          "id-ID"
+                      <div className="flex items-center gap-3">
+                        <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400">
+                          Tenggat: {new Date(item.dueDate).toLocaleDateString("id-ID")}
+                        </span>
+                        <span className="text-[10px] uppercase font-bold tracking-wider text-indigo-400">
+                          Dibuat: {new Date(item.createdAt).toLocaleString("id-ID", { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                        {item.updatedAt !== item.createdAt && (
+                          <span className="text-[10px] uppercase font-bold tracking-wider text-amber-500">
+                            Diedit: {new Date(item.updatedAt).toLocaleString("id-ID", { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                          </span>
                         )}
-                      </span>
-
+                      </div>
                     </div>
                   </div>
+                </Link>
+
+                <div className="flex items-center gap-2 translate-x-10 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleEditClick(item);
+                    }}
+                    className="p-3 text-indigo-500 hover:bg-indigo-50 rounded-2xl transition-all z-10"
+                    title="Edit Assignment"
+                  >
+                    <Edit3 size={20} />
+                  </button>
+
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      openDeleteConfirm(item.id);
+                    }}
+                    className="p-3 text-red-500 hover:bg-red-50 rounded-2xl transition-all z-10"
+                    title="Hapus Assignment"
+                  >
+                    <Trash2 size={20} />
+                  </button>
                 </div>
-
-                {/* DELETE */}
-
-                <button
-                  onClick={() =>
-                    openDeleteConfirm(
-                      item.id
-                    )
-                  }
-                  className="translate-x-10 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 p-3 text-red-500 hover:bg-red-50 rounded-2xl transition-all duration-300"
-                >
-                  <Trash2 size={20} />
-                </button>
 
               </motion.div>
             ))}
@@ -786,6 +743,57 @@ export function AssignmentsClient({
 
               </div>
 
+            </motion.div>
+          </motion.div>
+        )}
+
+        {isEditModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 overflow-y-auto"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="bg-white rounded-[2.5rem] p-8 max-w-5xl w-full shadow-2xl border border-gray-100 my-8"
+            >
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 rounded-2xl bg-indigo-50 text-indigo-600">
+                    <Edit3 size={20} />
+                  </div>
+                  <h2 className="text-2xl font-black text-gray-900">Edit Assignment</h2>
+                </div>
+                <button 
+                  onClick={cancelEdit}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                {renderFormFields()}
+              </div>
+
+              <div className="mt-10 flex justify-end gap-3 border-t pt-6">
+                <button
+                  onClick={cancelEdit}
+                  className="px-8 py-4 border border-gray-200 text-gray-600 rounded-full font-bold hover:bg-gray-50 transition-all"
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={handleCreateAssignment}
+                  disabled={loading}
+                  className="px-8 py-4 bg-black text-white rounded-full font-bold hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+                >
+                  {loading ? "Menyimpan..." : "Simpan Perubahan"}
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}

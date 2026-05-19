@@ -34,7 +34,7 @@ export default async function TeacherQuizAttemptsPage({ params }: { params: Prom
   if (!data) {
     return (
       <main className="min-h-screen bg-[var(--base)] px-6 py-10">
-        <div className="mx-auto max-w-3xl rounded-[40px] border border-[var(--border)] bg-[var(--surface)] p-7 md:p-10">
+        <div className="mx-auto max-w-3xl rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-7 md:p-10">
           <p className="text-sm font-semibold text-[var(--muted)]">Data attempt tidak ditemukan.</p>
           <Link className="mt-6 inline-flex rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-[var(--text)]" href="/teacher/quizzes">
             Kembali
@@ -47,7 +47,7 @@ export default async function TeacherQuizAttemptsPage({ params }: { params: Prom
   return (
     <main className="min-h-screen bg-[var(--base)] px-6 py-10">
       <div className="mx-auto max-w-5xl">
-        <div className="rounded-[40px] border border-[var(--border)] bg-[var(--surface)] p-7 md:p-10">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-7 md:p-10">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <h1 className="text-3xl font-black tracking-tight text-[var(--text)] md:text-4xl">

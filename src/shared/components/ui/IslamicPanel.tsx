@@ -43,7 +43,7 @@ export function IslamicPanel({ children, variant = "white", title, className = "
           <h3 className="font-serif text-3xl font-black tracking-tight uppercase">{title}</h3>
           <div className="mt-4 flex items-center justify-center gap-3">
             <div className="h-[1px] w-8 bg-slate-200" />
-            <div className="h-1.5 w-1.5 rotate-45 bg-[#E5B54F]" />
+            <div className="h-1.5 w-1.5 rotate-45 bg-[#D4AF37]" />
             <div className="h-[1px] w-8 bg-slate-200" />
           </div>
         </div>
@@ -63,10 +63,10 @@ export function IslamicCard({ children, className = "" }: { children: React.Reac
   return (
     <div className={`group relative overflow-hidden rounded-[35px] bg-white p-8 border border-slate-100 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-slate-200 ${className}`}>
       {/* Mihrab Shape Overlay (Subtle) */}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-[0.02] transition-opacity duration-500 pointer-events-none bg-[#1A2E44]" />
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-[0.02] transition-opacity duration-500 pointer-events-none bg-[#0B213F]" />
       
       {/* Decorative Star Corner */}
-      <div className="absolute -right-2 -top-2 h-12 w-12 rotate-12 opacity-5 text-[#E5B54F] group-hover:opacity-10 group-hover:rotate-45 transition-all duration-700">
+      <div className="absolute -right-2 -top-2 h-12 w-12 rotate-12 opacity-5 text-[#D4AF37] group-hover:opacity-10 group-hover:rotate-45 transition-all duration-700">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/></svg>
       </div>
 

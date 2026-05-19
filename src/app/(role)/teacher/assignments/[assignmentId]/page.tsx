@@ -66,7 +66,7 @@ export default async function TeacherAssignmentDetailPage({ params }: { params: 
   if (!assignment) {
     return (
       <main className="min-h-screen bg-[var(--base)] px-6 py-10">
-        <div className="mx-auto max-w-3xl rounded-[40px] border border-[var(--border)] bg-[var(--surface)] p-7 md:p-10">
+        <div className="mx-auto max-w-3xl rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-7 md:p-10">
           <p className="text-sm font-semibold text-[var(--muted)]">Assignment tidak ditemukan.</p>
           <Link className="mt-6 inline-flex rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-[var(--text)]" href="/teacher/assignments">
             Kembali
@@ -86,7 +86,7 @@ export default async function TeacherAssignmentDetailPage({ params }: { params: 
               {assignment.title}
             </h1>
             <p className="mt-2 text-sm text-[var(--muted)]">
-              Due: {new Date(assignment.dueDate).toLocaleString("id-ID")} • Max score: {assignment.maxScore}
+              Tenggat: {new Date(assignment.dueDate).toLocaleString("id-ID", { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })} • Skor Maksimal: {assignment.maxScore}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -100,13 +100,13 @@ export default async function TeacherAssignmentDetailPage({ params }: { params: 
           </div>
         </div>
 
-        <div className="rounded-[32px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
-          <p className="text-sm font-semibold text-[var(--muted)]">Brief</p>
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
+          <p className="text-sm font-semibold text-[var(--muted)]">Deskripsi Tugas</p>
           <p className="mt-3 text-sm leading-6 text-[var(--text)]">{assignment.description}</p>
         </div>
 
         {assignment.attachments && assignment.attachments.length > 0 ? (
-          <div className="mt-6 rounded-[32px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
+          <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
             <p className="text-sm font-semibold text-[var(--muted)]">Lampiran referensi</p>
             <div className="mt-4 grid gap-2 md:grid-cols-2">
               {assignment.attachments.map((a) => (

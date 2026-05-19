@@ -69,8 +69,8 @@ export default async function StudentAssignmentDetailPage({
                 {assignment.title}
               </h1>
               <p className="mt-2 text-sm text-[var(--muted)]">
-                {assignment.course?.title ?? "Course"} • Due{" "}
-                {new Date(assignment.dueDate).toLocaleDateString("id-ID")}
+                {assignment.course?.title ?? "Kursus"} • Tenggat:{" "}
+                {new Date(assignment.dueDate).toLocaleDateString("id-ID", { day: 'numeric', month: 'long', year: 'numeric' })}
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -79,15 +79,15 @@ export default async function StudentAssignmentDetailPage({
                 href="/student/assignments"
                 className="rounded-full border border-[var(--border)] bg-[var(--base)]/70 px-5 py-3 text-sm font-semibold text-[var(--text)] hover:bg-black/5"
               >
-                Back
+                Kembali
               </Link>
             </div>
           </div>
 
           <div className="mt-7 rounded-[28px] border border-[var(--border)] bg-[var(--base)]/70 p-6">
-            <p className="text-sm font-semibold text-[var(--text)]">Brief</p>
+            <p className="text-sm font-semibold text-[var(--text)]">Deskripsi Tugas</p>
             <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{assignment.description}</p>
-            <p className="mt-4 text-xs font-semibold text-[var(--muted)]">Max score: {assignment.maxScore}</p>
+            <p className="mt-4 text-xs font-semibold text-[var(--muted)]">Skor Maksimal: {assignment.maxScore}</p>
           </div>
 
           {assignment.attachments && assignment.attachments.length > 0 && (

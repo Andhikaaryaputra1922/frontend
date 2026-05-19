@@ -2,12 +2,12 @@
 
 /* ─── Al Faiz Color System ─────────────────────────── */
 :root {
-  --primary:       #1A2E44;
-  --primary-dark:  #0F1C2E;
-  --primary-light: #2A3E54;
+  --primary:       #0B213F;
+  --primary-dark:  #051226;
+  --primary-light: #1C3A5E;
   --primary-ink:   #ffffff;
   --accent:        #FDFDFD;
-  --amber:         #E5B54F;
+  --amber:         #D4AF37;
 
   --base:          #FDFDFD;
   --surface:       #ffffff;
@@ -23,8 +23,8 @@
 }
 
 :root[data-theme="light"] {
-  --primary:       #1A2E44;
-  --primary-dark:  #0F1C2E;
+  --primary:       #0B213F;
+  --primary-dark:  #051226;
   --primary-ink:   #ffffff;
   --accent:        #FDFDFD;
   --base:          #FDFDFD;
@@ -59,8 +59,8 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --primary:       #1A2E44;
-    --primary-dark:  #0F1C2E;
+    --primary:       #0B213F;
+    --primary-dark:  #051226;
     --primary-ink:   #ffffff;
     --accent:        #0F1C2E;
     --base:          #050B14;

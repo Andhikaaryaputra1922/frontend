@@ -23,13 +23,15 @@ type Quiz = {
   isRandomized: boolean;
   timeLimit?: number | null;
   questions: QuizQuestion[];
+  batchId?: string | null;
 };
 
 type Props = {
   quiz: Quiz;
+  batches: Array<{ id: string; name: string }>;
 };
 
-export function QuizBuilder({ quiz }: Props) {
+export function QuizBuilder({ quiz, batches }: Props) {
   const router = useRouter();
   const sortedQuestions = useMemo(
     () => [...(quiz.questions ?? [])].sort((a, b) => a.orderNumber - b.orderNumber),
@@ -41,6 +43,7 @@ export function QuizBuilder({ quiz }: Props) {
   const [passScore, setPassScore] = useState(quiz.passScore);
   const [maxAttempts, setMaxAttempts] = useState(quiz.maxAttempts);
   const [isRandomized, setIsRandomized] = useState(quiz.isRandomized);
+  const [batchId, setBatchId] = useState(quiz.batchId ?? "");
   const [timeLimit, setTimeLimit] = useState<string>(quiz.timeLimit ? String(quiz.timeLimit) : "");
   const [isSaving, setIsSaving] = useState(false);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
@@ -67,6 +70,7 @@ export function QuizBuilder({ quiz }: Props) {
           passScore,
           maxAttempts,
           isRandomized,
+          batchId: batchId || null,
           timeLimit: timeLimit.trim() ? Number(timeLimit) : null,
         }),
       });
@@ -213,6 +217,22 @@ export function QuizBuilder({ quiz }: Props) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
+          </label>
+          
+          <label className="block">
+            <span className="mb-2 block text-xs font-semibold text-[var(--muted)]">Batch / Angkatan (Opsional)</span>
+            <select
+              className="w-full rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/15"
+              value={batchId}
+              onChange={(e) => setBatchId(e.target.value)}
+            >
+              <option value="">-- Semua Siswa --</option>
+              {batches.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.name}
+                </option>
+              ))}
+            </select>
           </label>
 
           <label className="block">

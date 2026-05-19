@@ -35,18 +35,28 @@ async function getQuiz(baseUrl: string, token: string, quizId: string): Promise<
   return data.quiz ?? null;
 }
 
+async function getBatches(baseUrl: string): Promise<any[]> {
+  const response = await fetch(`${baseUrl}/api/batches`, { cache: "no-store" });
+  if (!response.ok) return [];
+  const data = (await response.json()) as { batches: any[] };
+  return data.batches ?? [];
+}
+
 export default async function TeacherQuizBuilderPage({ params }: { params: Promise<{ quizId: string }> }) {
   const { quizId } = await params;
   const baseUrl = await getRequestOrigin();
   const cookieStore = await cookies();
   const token = cookieStore.get(getAuthCookieName())?.value ?? "";
 
-  const quiz = await getQuiz(baseUrl, token, quizId);
+  const [quiz, batches] = await Promise.all([
+    getQuiz(baseUrl, token, quizId),
+    getBatches(baseUrl)
+  ]);
 
   if (!quiz) {
     return (
       <main className="min-h-screen bg-[var(--base)] px-6 py-10">
-        <div className="mx-auto max-w-3xl rounded-[40px] border border-[var(--border)] bg-[var(--surface)] p-7 md:p-10">
+        <div className="mx-auto max-w-3xl rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-7 md:p-10">
           <p className="text-sm font-semibold text-[var(--muted)]">Quiz tidak ditemukan.</p>
           <Link className="mt-6 inline-flex rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-[var(--text)]" href="/teacher/quizzes">
             Kembali
@@ -83,7 +93,7 @@ export default async function TeacherQuizBuilderPage({ params }: { params: Promi
           </div>
         </div>
 
-        <QuizBuilder quiz={quiz} />
+        <QuizBuilder quiz={quiz} batches={batches} />
       </div>
     </main>
   );

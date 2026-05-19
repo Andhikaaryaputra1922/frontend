@@ -175,15 +175,15 @@ export default function TeacherCertificatesPage() {
         <header className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="inline-block h-1.5 w-8 rounded-full bg-[#8B0000]" />
-              <span className="text-xs font-black uppercase tracking-[0.2em] text-[#8B0000]">Manajemen</span>
+              <span className="inline-block h-1.5 w-8 rounded-full bg-[#0B213F]" />
+              <span className="text-xs font-black uppercase tracking-[0.2em] text-[#0B213F]">Manajemen</span>
             </div>
             <h1 className="text-3xl font-black tracking-tight text-slate-900 md:text-4xl">Sertifikat Siswa</h1>
             <p className="mt-2 text-sm text-slate-500">Terbitkan dan kelola sertifikat untuk siswa berprestasi.</p>
           </div>
           <button
             onClick={() => setShowIssueModal(true)}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#8B0000] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[#8B0000]/20 hover:bg-[#6B0000] hover:-translate-y-0.5 transition-all"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#0B213F] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[#0B213F]/20 hover:bg-[#0d2847] hover:-translate-y-0.5 transition-all"
           >
             <IC.Plus /> Terbitkan Sertifikat
           </button>
@@ -200,7 +200,7 @@ export default function TeacherCertificatesPage() {
 
           {loading ? (
             <div className="p-20 text-center">
-              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-[#8B0000] border-t-transparent" />
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-[#0B213F] border-t-transparent" />
               <p className="mt-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Memuat data...</p>
             </div>
           ) : certs.length === 0 ? (
@@ -233,7 +233,7 @@ export default function TeacherCertificatesPage() {
                         <p className="text-[10px] font-medium text-slate-400">{cert.user.email}</p>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="inline-block px-2.5 py-1 rounded-lg bg-[#8B0000]/5 text-[#8B0000] text-[10px] font-bold">
+                        <span className="inline-block px-2.5 py-1 rounded-lg bg-[#0B213F]/5 text-[#0B213F] text-[10px] font-bold">
                           {cert.course.title}
                         </span>
                       </td>
@@ -272,7 +272,7 @@ export default function TeacherCertificatesPage() {
                 <select
                   value={selectedCourse}
                   onChange={(e) => setSelectedCourse(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-[#8B0000]/20 focus:border-[#8B0000] outline-none transition-all"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-[#0B213F]/20 focus:border-[#0B213F] outline-none transition-all"
                 >
                   <option value="">-- Pilih Mata Pelajaran --</option>
                   {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
@@ -285,7 +285,7 @@ export default function TeacherCertificatesPage() {
                   {selectedCourse && students.length > 0 && (
                     <button 
                       onClick={toggleAll}
-                      className="text-[10px] font-bold text-[#8B0000] hover:underline"
+                      className="text-[10px] font-bold text-[#0B213F] hover:underline"
                     >
                       {selectedStudents.length === students.length ? "Batal Semua" : "Pilih Semua"}
                     </button>
@@ -311,7 +311,7 @@ export default function TeacherCertificatesPage() {
                           type="checkbox"
                           checked={selectedStudents.includes(s.id)}
                           onChange={() => toggleStudent(s.id)}
-                          className="h-4 w-4 rounded border-slate-300 text-[#8B0000] focus:ring-[#8B0000]"
+                          className="h-4 w-4 rounded border-slate-300 text-[#0B213F] focus:ring-[#0B213F]"
                         />
                         <div className="min-w-0">
                           <p className="text-xs font-bold text-slate-800 truncate">{s.name}</p>
@@ -324,7 +324,7 @@ export default function TeacherCertificatesPage() {
               </div>
 
               <div className="p-4 bg-emerald-50 rounded-2xl flex gap-3 items-start">
-                <span className="text-emerald-600 mt-0.5">✨</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-600 mt-0.5 shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
                 <p className="text-[10px] font-bold text-emerald-800 leading-relaxed uppercase">Sertifikat akan otomatis muncul di dashboard siswa segera setelah diterbitkan.</p>
               </div>
 
@@ -338,7 +338,7 @@ export default function TeacherCertificatesPage() {
                 <button
                   disabled={selectedStudents.length === 0 || issuing}
                   onClick={handleIssue}
-                  className="flex-1 px-6 py-4 rounded-xl bg-[#8B0000] text-white text-xs font-black uppercase tracking-widest shadow-lg shadow-[#8B0000]/20 hover:bg-[#6B0000] transition-all disabled:opacity-50"
+                  className="flex-1 px-6 py-4 rounded-xl bg-[#0B213F] text-white text-xs font-black uppercase tracking-widest shadow-lg shadow-[#0B213F]/20 hover:bg-[#0d2847] transition-all disabled:opacity-50"
                 >
                   {issuing ? "Memproses..." : "Terbitkan"}
                 </button>

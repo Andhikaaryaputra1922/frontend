@@ -42,8 +42,8 @@ export default async function CourseContentPage({ params }: { params: Promise<{ 
         <header className="mb-10 flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="inline-block h-1.5 w-8 rounded-full bg-[#8B0000]" />
-              <span className="text-xs font-black uppercase tracking-[0.2em] text-[#8B0000]">Curriculum Builder</span>
+              <span className="inline-block h-1.5 w-8 rounded-full bg-[#0B213F]" />
+              <span className="text-xs font-black uppercase tracking-[0.2em] text-[#0B213F]">Curriculum Builder</span>
             </div>
             <h1 className="text-3xl font-black tracking-tight text-slate-900 md:text-4xl truncate max-w-[600px]">
               {course.title}

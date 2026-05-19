@@ -12,6 +12,7 @@ type Assignment = {
   dueDate: string;
   status: "pending" | "submitted" | "graded";
   grade?: number;
+  createdAt?: string;
 };
 
 async function getAssignments(): Promise<Assignment[]> {
@@ -20,16 +21,40 @@ async function getAssignments(): Promise<Assignment[]> {
   const token       = cookieStore.get(cookieName)?.value;
   if (!token) return [];
 
-  const origin = getRequestOrigin();
+  const origin = await getRequestOrigin();
 
   try {
-    const res = await fetch(`${origin}/api/student/assignments`, {
+    const res = await fetch(`${origin}/api/assignments`, {
       headers: { Cookie: `${cookieName}=${token}` },
       cache: "no-store",
     });
     if (!res.ok) return [];
-    return res.json();
-  } catch {
+    const data = await res.json();
+    const rawAssignments = data.assignments || [];
+
+    return rawAssignments.map((a: any) => {
+      const submission = a.submissions?.[0];
+      let status: Assignment["status"] = "pending";
+      if (submission) {
+        status = submission.status === "GRADED" ? "graded" : "submitted";
+      }
+
+      return {
+        id: a.id,
+        title: a.title,
+        courseName: a.course?.title || "Unknown Course",
+        dueDate: new Date(a.dueDate).toLocaleDateString("id-ID", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        }),
+        status,
+        grade: submission?.score,
+        createdAt: a.createdAt,
+      };
+    });
+  } catch (error) {
+    console.error("Fetch assignments error:", error);
     return [];
   }
 }
@@ -77,7 +102,17 @@ export default async function AssignmentsPage() {
               >
                 <div className="min-w-0">
                   <p className="font-semibold text-[var(--text)] text-sm truncate">{a.title}</p>
-                  <p className="text-xs text-[var(--muted)] mt-0.5">{a.courseName} · Tenggat: {a.dueDate}</p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <p className="text-xs text-[var(--muted)]">{a.courseName}</p>
+                    <span className="text-[10px] text-gray-300">|</span>
+                    <p className="text-xs text-[var(--muted)]">Tenggat: {a.dueDate}</p>
+                    {a.createdAt && (
+                      <>
+                        <span className="text-[10px] text-gray-300">|</span>
+                        <p className="text-[10px] text-indigo-400 font-medium">Dirilis: {new Date(a.createdAt).toLocaleDateString("id-ID", { day: 'numeric', month: 'short' })}</p>
+                      </>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 ml-4 flex-shrink-0">
                   {a.grade !== undefined && (

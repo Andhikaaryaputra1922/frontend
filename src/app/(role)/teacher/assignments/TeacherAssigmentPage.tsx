@@ -15,8 +15,13 @@ type Assignment = {
   dueDate: string;
   maxScore: number;
   course: { id: string; title: string };
+  batch?: { id: string; name: string } | null;
   attachmentUrl?: string;
+  createdAt: string;
+  updatedAt: string;
 };
+
+type Batch = { id: string; name: string; courseId: string; isActive: boolean };
 
 // 2. Pastikan fungsi getCourses ini ada di sini (di luar export default)
 async function getCourses(baseUrl: string): Promise<Course[]> {
@@ -37,6 +42,13 @@ async function getAssignments(baseUrl: string, token: string): Promise<Assignmen
   return data.assignments ?? [];
 }
 
+async function getBatches(baseUrl: string): Promise<Batch[]> {
+  const response = await fetch(`${baseUrl}/api/batches`, { cache: "no-store" });
+  if (!response.ok) return [];
+  const data = (await response.json()) as { batches: Batch[] };
+  return data.batches ?? [];
+}
+
 export default async function TeacherAssignmentsPage() {
   const baseUrl = await getRequestOrigin();
   const cookieStore = await cookies();
@@ -44,9 +56,10 @@ export default async function TeacherAssignmentsPage() {
   const auth = token ? await verifyUserJwt(token).catch(() => null) : null;
 
   // Baris 31 (lokasi error kamu) sekarang akan mengenali getCourses
-  const [courses, assignments] = await Promise.all([
+  const [courses, assignments, batches] = await Promise.all([
     getCourses(baseUrl),
     getAssignments(baseUrl, token),
+    getBatches(baseUrl),
   ]);
 
   const filteredCourses =
@@ -99,6 +112,7 @@ export default async function TeacherAssignmentsPage() {
                 baseUrl={baseUrl}
                 token={token}
                 filteredCourses={filteredCourses.map((c) => ({ id: c.id, title: c.title }))}
+                batches={batches}
                 assignments={assignments}
               />
           </div>

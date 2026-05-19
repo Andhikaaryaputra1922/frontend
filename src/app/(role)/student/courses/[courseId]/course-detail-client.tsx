@@ -39,7 +39,7 @@ export function CourseDetailClient({ course, chapters }: { course: Course, chapt
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {chapters.length === 0 ? (
             <div className="col-span-full rounded-[40px] border-2 border-dashed border-slate-200 p-20 text-center">
-              <p className="text-4xl mb-4">📖</p>
+              
               <h3 className="text-xl font-bold text-slate-400">Belum ada bab yang dibuat untuk kursus ini.</h3>
             </div>
           ) : (
@@ -57,7 +57,7 @@ export function CourseDetailClient({ course, chapters }: { course: Course, chapt
                   <span className="text-xl font-black text-[#8B0000]">{chapter.orderNumber}</span>
                 </div>
                 
-                <h3 className="text-xl font-black text-[#1A2E44] uppercase tracking-tight leading-tight mb-3 group-hover:text-[#8B0000] transition-colors">
+                <h3 className="text-xl font-black text-[#0B213F] uppercase tracking-tight leading-tight mb-3 group-hover:text-[#8B0000] transition-colors">
                   {chapter.title}
                 </h3>
                 
@@ -88,11 +88,11 @@ export function CourseDetailClient({ course, chapters }: { course: Course, chapt
             <div className="p-8 md:p-10 border-b border-slate-50 bg-slate-50/30 flex items-center justify-between">
               <div>
                 <p className="text-[10px] font-black text-[#8B0000] uppercase tracking-[0.3em] mb-2">Bab {activeChapter?.orderNumber}</p>
-                <h2 className="text-3xl font-black text-[#1A2E44] uppercase tracking-tighter leading-tight">
+                <h2 className="text-3xl font-black text-[#0B213F] uppercase tracking-tighter leading-tight">
                   {activeChapter?.title}
                 </h2>
               </div>
-              <div className="h-16 w-16 rounded-3xl bg-[#1A2E44] text-[#E5B54F] flex items-center justify-center text-2xl font-black shadow-lg shadow-[#1A2E44]/20">
+              <div className="h-16 w-16 rounded-3xl bg-[#0B213F] text-[#D4AF37] flex items-center justify-center text-2xl font-black shadow-lg shadow-[#0B213F]/20">
                 {activeChapter?.lessons.length}
               </div>
             </div>
@@ -108,12 +108,12 @@ export function CourseDetailClient({ course, chapters }: { course: Course, chapt
                     key={lesson.id}
                     className="group flex items-center gap-6 p-8 hover:bg-slate-50/50 transition-all"
                   >
-                    <div className="h-12 w-12 rounded-2xl bg-slate-100 flex items-center justify-center text-[#1A2E44] group-hover:bg-[#8B0000] group-hover:text-white transition-all shadow-sm">
+                    <div className="h-12 w-12 rounded-2xl bg-slate-100 flex items-center justify-center text-[#0B213F] group-hover:bg-[#8B0000] group-hover:text-white transition-all shadow-sm">
                       {lesson.type === "VIDEO" ? <Play size={20} fill="currentColor" /> : <FileText size={20} />}
                     </div>
                     
                     <div className="flex-1">
-                      <h4 className="text-base font-black text-[#1A2E44] uppercase tracking-tight group-hover:text-[#8B0000] transition-colors">
+                      <h4 className="text-base font-black text-[#0B213F] uppercase tracking-tight group-hover:text-[#8B0000] transition-colors">
                         {lesson.title}
                       </h4>
                       <div className="flex items-center gap-3 mt-1 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
@@ -129,7 +129,7 @@ export function CourseDetailClient({ course, chapters }: { course: Course, chapt
 
                     <Link 
                       href={`/student/courses/${course.id}/learn/${lesson.id}`}
-                      className="px-6 py-3 rounded-2xl bg-[#1A2E44] text-white text-[10px] font-black uppercase tracking-widest hover:bg-[#8B0000] hover:scale-105 transition-all shadow-lg active:scale-95"
+                      className="px-6 py-3 rounded-2xl bg-[#0B213F] text-white text-[10px] font-black uppercase tracking-widest hover:bg-[#8B0000] hover:scale-105 transition-all shadow-lg active:scale-95"
                     >
                       Buka Materi
                     </Link>

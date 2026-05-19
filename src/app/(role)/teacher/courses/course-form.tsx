@@ -99,9 +99,9 @@ export function CourseForm({ initialData, courseId }: Props) {
       <form onSubmit={handleSubmit} className="space-y-10">
         
         {/* Top Info Banner */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-8 bg-white border border-slate-100 rounded-[40px] shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-8 bg-white border border-slate-100 rounded-2xl shadow-sm">
            <div className="flex items-center gap-5">
-              <div className="h-14 w-14 rounded-2xl bg-[#8B0000] flex items-center justify-center text-[#E5B54F] shadow-lg shadow-red-900/20">
+              <div className="h-14 w-14 rounded-2xl bg-[#0B213F] flex items-center justify-center text-[#D4AF37] shadow-lg shadow-[#0B213F]/10">
                  <Info size={28} />
               </div>
               <div>
@@ -120,7 +120,7 @@ export function CourseForm({ initialData, courseId }: Props) {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="flex items-center gap-2 px-10 py-4 rounded-2xl bg-[#8B0000] text-white text-[10px] font-black uppercase tracking-widest hover:bg-red-800 transition-all shadow-xl shadow-red-900/20"
+                className="flex items-center gap-2 px-10 py-4 rounded-2xl bg-[#0B213F] text-white text-[10px] font-black uppercase tracking-widest hover:bg-#0d2847 transition-all shadow-xl shadow-[#0B213F]/10"
               >
                  {loading ? 'Menyimpan...' : (courseId ? 'Simpan Perubahan' : 'Lanjut ke Kurikulum')}
                  <ArrowRight size={14} />
@@ -132,9 +132,9 @@ export function CourseForm({ initialData, courseId }: Props) {
            
            {/* Left Column: Visual & Status */}
            <div className="space-y-8">
-              <div className="p-8 bg-white border border-slate-100 rounded-[40px] shadow-sm">
-                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8B0000] mb-6">Thumbnail Kursus</p>
-                 <div className="aspect-[4/3] rounded-[32px] bg-slate-50 border-2 border-dashed border-slate-200 overflow-hidden relative group">
+              <div className="p-8 bg-white border border-slate-100 rounded-2xl shadow-sm">
+                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#0B213F] mb-6">Thumbnail Kursus</p>
+                 <div className="aspect-[4/3] rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 overflow-hidden relative group">
                     {preview ? (
                        <img src={preview} className="w-full h-full object-cover" />
                     ) : (
@@ -156,7 +156,7 @@ export function CourseForm({ initialData, courseId }: Props) {
                  <p className="text-[9px] text-slate-400 mt-4 italic text-center">* Rekomendasi: 1200x900px (PNG/JPG)</p>
               </div>
 
-              <div className="p-8 bg-white border border-slate-100 rounded-[40px] shadow-sm">
+              <div className="p-8 bg-white border border-slate-100 rounded-2xl shadow-sm">
                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6">Visibilitas & Status</p>
                  <div className="space-y-4">
                     <div>
@@ -164,7 +164,7 @@ export function CourseForm({ initialData, courseId }: Props) {
                        <select 
                         value={formData.status}
                         onChange={(e) => setFormData({...formData, status: e.target.value})}
-                        className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-transparent focus:border-[#8B0000] outline-none text-xs font-bold"
+                        className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-transparent focus:border-[#0B213F] outline-none text-xs font-bold"
                        >
                           <option value="DRAFT">DRAFT (Internal)</option>
                           <option value="PUBLISHED">PUBLISHED (Live)</option>
@@ -176,7 +176,7 @@ export function CourseForm({ initialData, courseId }: Props) {
                        <select 
                         value={formData.accessType}
                         onChange={(e) => setFormData({...formData, accessType: e.target.value})}
-                        className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-transparent focus:border-[#8B0000] outline-none text-xs font-bold"
+                        className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-transparent focus:border-[#0B213F] outline-none text-xs font-bold"
                        >
                           <option value="PREMIUM">PREMIUM (Berbayar)</option>
                           <option value="FREE">FREE (Gratis)</option>
@@ -190,7 +190,7 @@ export function CourseForm({ initialData, courseId }: Props) {
 
            {/* Middle & Right Column: Details */}
            <div className="lg:col-span-2 space-y-10">
-              <section className="p-10 bg-white border border-slate-100 rounded-[48px] shadow-sm space-y-8">
+              <section className="p-10 bg-white border border-slate-100 rounded-2xl shadow-sm space-y-8">
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="md:col-span-2">
                        <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Judul Kursus</label>
@@ -200,7 +200,7 @@ export function CourseForm({ initialData, courseId }: Props) {
                         value={formData.title}
                         onChange={(e) => setFormData({...formData, title: e.target.value})}
                         placeholder="Contoh: UI/UX Mastery dari Dasar ke Pro"
-                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-transparent focus:bg-white focus:border-[#8B0000] outline-none text-sm font-bold transition-all"
+                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-transparent focus:bg-white focus:border-[#0B213F] outline-none text-sm font-bold transition-all"
                        />
                     </div>
                     <div className="md:col-span-2">
@@ -210,7 +210,7 @@ export function CourseForm({ initialData, courseId }: Props) {
                         required
                         value={formData.slug}
                         onChange={(e) => setFormData({...formData, slug: e.target.value})}
-                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-transparent focus:bg-white focus:border-[#8B0000] outline-none text-sm font-bold transition-all"
+                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-transparent focus:bg-white focus:border-[#0B213F] outline-none text-sm font-bold transition-all"
                        />
                     </div>
                     <div className="md:col-span-2">
@@ -221,7 +221,7 @@ export function CourseForm({ initialData, courseId }: Props) {
                         value={formData.description}
                         onChange={(e) => setFormData({...formData, description: e.target.value})}
                         placeholder="Jelaskan apa yang akan dipelajari siswa..."
-                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-transparent focus:bg-white focus:border-[#8B0000] outline-none text-sm font-bold transition-all"
+                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-transparent focus:bg-white focus:border-[#0B213F] outline-none text-sm font-bold transition-all"
                        />
                     </div>
                     <div>
@@ -232,7 +232,7 @@ export function CourseForm({ initialData, courseId }: Props) {
                         value={formData.category}
                         onChange={(e) => setFormData({...formData, category: e.target.value})}
                         placeholder="Desain, Programming, Bisnis..."
-                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-transparent focus:bg-white focus:border-[#8B0000] outline-none text-sm font-bold transition-all"
+                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-transparent focus:bg-white focus:border-[#0B213F] outline-none text-sm font-bold transition-all"
                        />
                     </div>
                     <div>
@@ -240,7 +240,7 @@ export function CourseForm({ initialData, courseId }: Props) {
                        <select 
                         value={formData.level}
                         onChange={(e) => setFormData({...formData, level: e.target.value})}
-                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-transparent focus:bg-white focus:border-[#8B0000] outline-none text-sm font-bold transition-all"
+                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-transparent focus:bg-white focus:border-[#0B213F] outline-none text-sm font-bold transition-all"
                        >
                           <option value="BEGINNER">BEGINNER (Dasar)</option>
                           <option value="INTERMEDIATE">INTERMEDIATE (Menengah)</option>
@@ -251,7 +251,7 @@ export function CourseForm({ initialData, courseId }: Props) {
               </section>
 
               {/* Pricing Section */}
-              <section className="p-10 bg-white border border-slate-100 rounded-[48px] shadow-sm">
+              <section className="p-10 bg-white border border-slate-100 rounded-2xl shadow-sm">
                  <div className="flex items-center gap-3 mb-8">
                     <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
                        <Globe size={20} />
@@ -265,7 +265,7 @@ export function CourseForm({ initialData, courseId }: Props) {
                         type="number" 
                         value={formData.price}
                         onChange={(e) => setFormData({...formData, price: Number(e.target.value)})}
-                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-transparent focus:bg-white focus:border-[#8B0000] outline-none text-sm font-bold transition-all"
+                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-transparent focus:bg-white focus:border-[#0B213F] outline-none text-sm font-bold transition-all"
                        />
                     </div>
                     <div>
@@ -275,14 +275,14 @@ export function CourseForm({ initialData, courseId }: Props) {
                         value={formData.discountPrice}
                         onChange={(e) => setFormData({...formData, discountPrice: e.target.value})}
                         placeholder="Kosongkan jika tidak diskon"
-                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-transparent focus:bg-white focus:border-[#8B0000] outline-none text-sm font-bold transition-all"
+                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-transparent focus:bg-white focus:border-[#0B213F] outline-none text-sm font-bold transition-all"
                        />
                     </div>
                  </div>
               </section>
 
               {/* Metadata Section */}
-              <section className="p-10 bg-white border border-slate-100 rounded-[48px] shadow-sm">
+              <section className="p-10 bg-white border border-slate-100 rounded-2xl shadow-sm">
                  <div className="flex items-center gap-3 mb-8">
                     <div className="h-10 w-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600">
                        <Clock size={20} />
@@ -297,7 +297,7 @@ export function CourseForm({ initialData, courseId }: Props) {
                         value={formData.duration}
                         onChange={(e) => setFormData({...formData, duration: e.target.value})}
                         placeholder="Contoh: 12 Jam 30 Menit"
-                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-transparent focus:bg-white focus:border-[#8B0000] outline-none text-sm font-bold transition-all"
+                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-transparent focus:bg-white focus:border-[#0B213F] outline-none text-sm font-bold transition-all"
                        />
                     </div>
                     <div>
@@ -306,7 +306,7 @@ export function CourseForm({ initialData, courseId }: Props) {
                         type="text" 
                         value={formData.language}
                         onChange={(e) => setFormData({...formData, language: e.target.value})}
-                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-transparent focus:bg-white focus:border-[#8B0000] outline-none text-sm font-bold transition-all"
+                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-transparent focus:bg-white focus:border-[#0B213F] outline-none text-sm font-bold transition-all"
                        />
                     </div>
                     <div className="md:col-span-2">
@@ -316,14 +316,14 @@ export function CourseForm({ initialData, courseId }: Props) {
                         value={formData.prerequisites}
                         onChange={(e) => setFormData({...formData, prerequisites: e.target.value})}
                         placeholder="Contoh: Paham dasar komputer, Memiliki aplikasi Figma..."
-                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-transparent focus:bg-white focus:border-[#8B0000] outline-none text-sm font-bold transition-all"
+                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-transparent focus:bg-white focus:border-[#0B213F] outline-none text-sm font-bold transition-all"
                        />
                     </div>
                  </div>
               </section>
 
               {/* Extras Section */}
-              <section className="p-10 bg-white border border-slate-100 rounded-[48px] shadow-sm">
+              <section className="p-10 bg-white border border-slate-100 rounded-2xl shadow-sm">
                  <div className="flex items-center gap-3 mb-8">
                     <div className="h-10 w-10 rounded-xl bg-violet-50 flex items-center justify-center text-violet-600">
                        <Award size={20} />
@@ -340,7 +340,7 @@ export function CourseForm({ initialData, courseId }: Props) {
                         type="checkbox" 
                         checked={formData.hasCertificate}
                         onChange={(e) => setFormData({...formData, hasCertificate: e.target.checked})}
-                        className="h-6 w-6 accent-[#8B0000] rounded-lg"
+                        className="h-6 w-6 accent-[#0B213F] rounded-lg"
                        />
                     </div>
                     <div className="flex items-center justify-between p-6 rounded-3xl bg-slate-50 border border-slate-100">
@@ -352,7 +352,7 @@ export function CourseForm({ initialData, courseId }: Props) {
                         type="checkbox" 
                         checked={formData.requireExam}
                         onChange={(e) => setFormData({...formData, requireExam: e.target.checked})}
-                        className="h-6 w-6 accent-[#8B0000] rounded-lg"
+                        className="h-6 w-6 accent-[#0B213F] rounded-lg"
                        />
                     </div>
                  </div>

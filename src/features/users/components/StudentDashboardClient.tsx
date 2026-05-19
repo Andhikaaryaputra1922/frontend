@@ -192,10 +192,10 @@ function OverviewPage({ data }: { data: DashboardData }) {
         {stats.map((card) => (
           <div key={card.label} className="group bg-white rounded-[40px] p-8 shadow-sm border border-white hover:shadow-2xl hover:-translate-y-2 hover:scale-[1.02] transition-all duration-500 ease-out">
             <div className="flex items-center justify-between mb-6">
-               <div className="h-14 w-14 rounded-2xl bg-[#FAF9F6] flex items-center justify-center text-2xl group-hover:bg-[#1A2E44] group-hover:text-white transition-colors duration-500">
+               <div className="h-14 w-14 rounded-2xl bg-[#FAF9F6] flex items-center justify-center text-2xl group-hover:bg-[#0B213F] group-hover:text-white transition-colors duration-500">
                   {card.icon}
                </div>
-               <span className="text-2xl font-black text-[#1A2E44] tracking-tight">{card.value}</span>
+               <span className="text-2xl font-black text-[#0B213F] tracking-tight">{card.value}</span>
             </div>
             <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{card.label}</p>
          </div>
@@ -436,8 +436,8 @@ export default function StudentDashboardClient() {
         {/* ── Top Header ────────────────────────────────────────────────── */}
          <header className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-16">
             <div>
-               <h1 className="text-4xl md:text-6xl font-black text-[#1A2E44] tracking-tighter leading-none">
-                  SABTU <span className="text-[#E5B54F]">BAROKAH.</span>
+               <h1 className="text-4xl md:text-6xl font-black text-[#0B213F] tracking-tighter leading-none">
+                  SABTU <span className="text-[#D4AF37]">BAROKAH.</span>
                </h1>
                <p className="text-slate-400 font-bold mt-4 uppercase tracking-[0.3em] text-[10px]">Student Dashboard · Haneen Academy</p>
             </div>
@@ -446,13 +446,13 @@ export default function StudentDashboardClient() {
                 <input 
                   type="text" 
                   placeholder="Cari materi, kuis, atau tugas..." 
-                  className="w-full bg-white border-none rounded-2xl py-3.5 pl-12 pr-4 shadow-sm text-sm focus:ring-2 focus:ring-[#E5B54F] transition-all"
+                  className="w-full bg-white border-none rounded-2xl py-3.5 pl-12 pr-4 shadow-sm text-sm focus:ring-2 focus:ring-[#D4AF37] transition-all"
                 />
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 </div>
              </div>
-             <button className="h-12 w-12 bg-white rounded-2xl flex items-center justify-center text-[#1A2E44] shadow-sm hover:bg-[#E5B54F] hover:text-white transition-all">
+             <button className="h-12 w-12 bg-white rounded-2xl flex items-center justify-center text-[#0B213F] shadow-sm hover:bg-[#D4AF37] hover:text-white transition-all">
                 <Settings size={20} />
              </button>
           </div>
@@ -473,30 +473,30 @@ export default function StudentDashboardClient() {
                      <img 
                        src={data.student.email === "admin@haneen.id" ? "/admin-avatar.jpg" : "https://api.dicebear.com/7.x/avataaars/svg?seed=" + data.student.name} 
                        alt={data.student.name}
-                       className="w-full h-100 object-cover bg-[#1A2E44]"
+                       className="w-full h-100 object-cover bg-[#0B213F]"
                      />
                   </div>
-                  <button className="absolute bottom-2 right-2 h-10 w-10 bg-white rounded-full shadow-lg flex items-center justify-center text-[#1A2E44] border border-slate-100 hover:scale-110 transition-transform">
+                  <button className="absolute bottom-2 right-2 h-10 w-10 bg-white rounded-full shadow-lg flex items-center justify-center text-[#0B213F] border border-slate-100 hover:scale-110 transition-transform">
                      <Settings size={16} />
                   </button>
                </div>
 
                <div className="flex-1">
                      <div className="flex flex-wrap items-center gap-3 mb-3">
-                        <span className="bg-[#1A2E44] text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest">Premium Member</span>
-                        <span className="bg-[#E5B54F] text-[#1A2E44] text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest italic">Akselerasi UTBK</span>
+                        <span className="bg-[#0B213F] text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest">Premium Member</span>
+                        <span className="bg-[#D4AF37] text-[#0B213F] text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest italic">Akselerasi UTBK</span>
                      </div>
-                     <h2 className="text-4xl font-black text-[#1A2E44] tracking-tighter mb-2">{data.student.name}</h2>
+                     <h2 className="text-4xl font-black text-[#0B213F] tracking-tighter mb-2">{data.student.name}</h2>
                      <p className="text-slate-400 font-bold text-sm tracking-wide">{data.student.email}</p>
                      
                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-sm mt-8">
                         <div className="space-y-1">
                            <p className="text-slate-400 font-bold text-[10px] uppercase tracking-wider">Tanggal Registrasi</p>
-                           <p className="text-[#1A2E44] font-bold">12 Januari 2026</p>
+                           <p className="text-[#0B213F] font-bold">12 Januari 2026</p>
                         </div>
                         <div className="space-y-1">
                            <p className="text-slate-400 font-bold text-[10px] uppercase tracking-wider">Negara, Kota</p>
-                           <p className="text-[#1A2E44] font-bold">Indonesia, Jakarta</p>
+                           <p className="text-[#0B213F] font-bold">Indonesia, Jakarta</p>
                         </div>
                      </div>
                </div>
@@ -505,8 +505,8 @@ export default function StudentDashboardClient() {
             {/* 2. Course Timeline */}
             <div className="bg-white rounded-[40px] p-8 md:p-10 shadow-sm border border-white">
                <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-xl font-black text-[#1A2E44]">Kursus Saya</h3>
-                  <Link href="/student/enrollments" className="text-xs font-bold text-[#E5B54F] hover:underline">Lihat Semua</Link>
+                  <h3 className="text-xl font-black text-[#0B213F]">Kursus Saya</h3>
+                  <Link href="/student/enrollments" className="text-xs font-bold text-[#D4AF37] hover:underline">Lihat Semua</Link>
                </div>
 
                <div className="relative pl-8 space-y-6">
@@ -524,7 +524,7 @@ export default function StudentDashboardClient() {
                     return (
                       <div key={e.id} className="relative flex items-center group">
                         {/* Dot on Line */}
-                        <div className="absolute -left-[25px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-4 border-white bg-[#1A2E44] shadow-sm z-10" />
+                        <div className="absolute -left-[25px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-4 border-white bg-[#0B213F] shadow-sm z-10" />
                         
                         <div className={`flex-1 flex flex-col md:flex-row items-center justify-between gap-4 p-6 rounded-3xl border transition-all duration-500 hover:scale-[1.02] ${color}`}>
                            <div className="flex-1 min-w-0">
@@ -557,35 +557,35 @@ export default function StudentDashboardClient() {
             
             {/* 1. Payment Info Card */}
             <div className="bg-white rounded-[35px] p-8 shadow-sm border border-white">
-               <h3 className="text-lg font-black text-[#1A2E44] mb-6">Pembayaran</h3>
+               <h3 className="text-lg font-black text-[#0B213F] mb-6">Pembayaran</h3>
                <div className="space-y-4">
                   <div className="bg-[#FAF9F6] rounded-2xl p-4 border border-slate-100">
                      <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">Metode Utama</p>
                      <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                            <div className="h-8 w-12 bg-white rounded border flex items-center justify-center font-black text-[10px]">VISA</div>
-                           <p className="text-sm font-bold text-[#1A2E44]">**** 4590</p>
+                           <p className="text-sm font-bold text-[#0B213F]">**** 4590</p>
                         </div>
                         <Settings size={14} className="text-slate-300" />
                      </div>
                   </div>
                   <div className="grid grid-cols-4 gap-2">
                      {["visa", "mc", "gpay", "wu"].map(p => (
-                        <div key={p} className="h-10 bg-[#FAF9F6] rounded-xl flex items-center justify-center text-[8px] font-black uppercase text-slate-300 border border-transparent hover:border-[#E5B54F] transition-all">{p}</div>
+                        <div key={p} className="h-10 bg-[#FAF9F6] rounded-xl flex items-center justify-center text-[8px] font-black uppercase text-slate-300 border border-transparent hover:border-[#D4AF37] transition-all">{p}</div>
                      ))}
                   </div>
                </div>
             </div>
 
             {/* 2. Premium Subscription Card */}
-            <div className="bg-[#1A2E44] rounded-[35px] p-8 shadow-2xl relative overflow-hidden group">
+            <div className="bg-[#0B213F] rounded-[35px] p-8 shadow-2xl relative overflow-hidden group">
                {/* Background Bird Motif */}
                <div className="absolute top-0 right-0 w-40 h-40 opacity-5 -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-700">
                   <svg width="100%" height="100%" viewBox="0 0 100 100" fill="white"><path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z" /></svg>
                </div>
 
                <div className="relative z-10 space-y-6">
-                  <div className="h-12 w-12 bg-[#E5B54F] rounded-2xl flex items-center justify-center text-[#1A2E44] shadow-lg">
+                  <div className="h-12 w-12 bg-[#D4AF37] rounded-2xl flex items-center justify-center text-[#0B213F] shadow-lg">
                      <Award size={24} />
                   </div>
                   <div>
@@ -600,12 +600,12 @@ export default function StudentDashboardClient() {
                        "Potongan 50% Event Offline"
                      ].map(feat => (
                         <li key={feat} className="flex items-center gap-3 text-[11px] font-medium text-white/80">
-                           <div className="h-1.5 w-1.5 rounded-full bg-[#E5B54F]" />
+                           <div className="h-1.5 w-1.5 rounded-full bg-[#D4AF37]" />
                            {feat}
                         </li>
                      ))}
                   </ul>
-                  <Link href="/student/packages" className="block w-full bg-white text-[#1A2E44] font-black text-xs py-4 rounded-2xl text-center shadow-xl hover:bg-[#E5B54F] hover:text-white transition-all transform hover:-translate-y-1">
+                  <Link href="/student/packages" className="block w-full bg-white text-[#0B213F] font-black text-xs py-4 rounded-2xl text-center shadow-xl hover:bg-[#D4AF37] hover:text-white transition-all transform hover:-translate-y-1">
                      Beli Paket Sekarang
                   </Link>
                </div>
@@ -613,12 +613,12 @@ export default function StudentDashboardClient() {
 
             {/* 3. Help Card */}
             <div className="bg-white rounded-[35px] p-8 border-2 border-dashed border-slate-100 flex flex-col items-center text-center">
-               <div className="h-14 w-14 bg-amber-50 text-[#E5B54F] rounded-full flex items-center justify-center mb-4">
+               <div className="h-14 w-14 bg-amber-50 text-[#D4AF37] rounded-full flex items-center justify-center mb-4">
                   <HelpCircle size={28} />
                </div>
-               <h4 className="font-black text-[#1A2E44]">Punya Pertanyaan?</h4>
+               <h4 className="font-black text-[#0B213F]">Punya Pertanyaan?</h4>
                <p className="text-xs text-slate-400 mt-2 leading-relaxed mb-6">Hubungi admin kami untuk bantuan teknis dan panduan belajar.</p>
-               <a href="https://wa.me/6285704833249" className="text-xs font-black text-[#1A2E44] hover:text-[#E5B54F] transition-colors underline">Chat WhatsApp</a>
+               <a href="https://wa.me/6285704833249" className="text-xs font-black text-[#0B213F] hover:text-[#D4AF37] transition-colors underline">Chat WhatsApp</a>
             </div>
 
           </div>

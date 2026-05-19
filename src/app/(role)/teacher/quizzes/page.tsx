@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { getAuthCookieName, verifyUserJwt } from "@/shared/lib/auth/jwt";
 import { getRequestOrigin } from "@/shared/lib/origin";
 import { QuizzesManager } from "@/features/courses/components/management/quizzes-manager";
-import BackButton from "@/shared/components/ui/BackButton";
+import TeacherPageLayout from "@/features/users/components/layouts/TeacherPageLayout";
 
 type Course = { id: string; title: string; teachers?: { id: string }[] };
 
@@ -41,40 +41,39 @@ export default async function TeacherQuizzesPage() {
   const token = cookieStore.get(getAuthCookieName())?.value ?? "";
   const auth = token ? await verifyUserJwt(token).catch(() => null) : null;
 
-  const [courses, quizzes] = await Promise.all([getCourses(baseUrl), getQuizzes(baseUrl, token)]);
-  const filteredCourses =
-    auth?.role === "TEACHER" ? courses.filter((c) => c.teachers?.some(t => t.id === auth.uid)) : courses;
+  async function getBatches(baseUrl: string, token: string, courseIds: string[]): Promise<any[]> {
+    if (!courseIds.length) return [];
+    const results = await Promise.all(
+      courseIds.map((cId) =>
+        fetch(`${baseUrl}/api/batches?courseId=${cId}`, {
+          cache: "no-store",
+          headers: { cookie: `${getAuthCookieName()}=${token}` },
+        }).then((r) => r.ok ? r.json().then((d: { batches: any[] }) => (d.batches ?? []).map(b => ({ ...b, courseId: cId }))) : [])
+      )
+    );
+    return results.flat();
+  }
+
+  const courses = await getCourses(baseUrl);
+  const filteredCourses = auth?.role === "TEACHER" ? courses.filter((c) => c.teachers?.some(t => t.id === auth.uid)) : courses;
+  
+  const [quizzes, batches] = await Promise.all([
+    getQuizzes(baseUrl, token),
+    getBatches(baseUrl, token, filteredCourses.map((c) => c.id))
+  ]);
 
   return (
-    <main className="min-h-screen bg-[var(--base)] px-6 py-10">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h1 className="text-3xl font-black tracking-tight text-[var(--text)] md:text-4xl">
-              Kelola Quiz
-            </h1>
-            <p className="mt-2 text-sm text-[var(--muted)]">
-              Buat quiz, susun pertanyaan, dan pantau attempt siswa.
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <BackButton />
-            <Link
-              href="/teacher"
-              className="inline-flex rounded-full border border-[var(--border)] bg-[var(--base)]/70 px-5 py-3 text-sm font-semibold text-[var(--text)] hover:bg-black/5"
-            >
-              Dashboard
-            </Link>
-          </div>
-        </div>
-
-        <QuizzesManager
-          basePath="/teacher"
-          courses={filteredCourses.map((c) => ({ id: c.id, title: c.title }))}
-          quizzes={quizzes}
-        />
-      </div>
-    </main>
+    <TeacherPageLayout
+      title="Kelola Quiz"
+      subtitle="Buat quiz, susun pertanyaan, dan pantau attempt siswa."
+    >
+      <QuizzesManager
+        basePath="/teacher"
+        courses={filteredCourses.map((c) => ({ id: c.id, title: c.title }))}
+        batches={batches}
+        quizzes={quizzes}
+      />
+    </TeacherPageLayout>
   );
 }
 

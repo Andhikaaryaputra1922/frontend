@@ -91,7 +91,7 @@ export function StudentMaterialsClient({ courses }: Props) {
 
       {totalMateri === 0 ? (
         <div className="rounded-[32px] border-2 border-dashed border-[var(--border)] bg-[var(--surface)] p-20 text-center">
-          <div className="text-6xl mb-6">📚</div>
+          
           <h3 className="text-2xl font-black text-[var(--text)] uppercase tracking-tight">Belum Ada Materi</h3>
           <p className="text-sm text-[var(--muted)] mt-2 max-w-md mx-auto font-medium">Pengajar sedang menyiapkan materi terbaik untukmu. Silakan cek kembali nanti atau hubungi admin.</p>
         </div>

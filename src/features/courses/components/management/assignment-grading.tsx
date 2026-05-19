@@ -43,6 +43,12 @@ export function AssignmentGrading({ assignmentId, maxScore, submissions }: Props
     try {
       const d = draft[submissionId];
       const scoreValue = d.score.trim() ? Number(d.score) : undefined;
+      
+      if (scoreValue !== undefined && (isNaN(scoreValue) || scoreValue < 0 || scoreValue > maxScore)) {
+        setError(`Nilai harus antara 0 dan ${maxScore}`);
+        setIsSaving(false);
+        return;
+      }
       const response = await fetch(`/api/assignments/${assignmentId}/submissions/${submissionId}/grade`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -84,20 +90,25 @@ export function AssignmentGrading({ assignmentId, maxScore, submissions }: Props
                   <p className="mt-1 text-xs font-semibold text-[var(--muted)]">
                     Submitted: {new Date(s.submittedAt).toLocaleString("id-ID")}
                   </p>
-                  <a
-                    href={s.submissionUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-3 inline-flex rounded-full bg-[var(--accent)] px-4 py-2 text-xs font-black text-[var(--text)]"
-                  >
-                    Buka jawaban
-                  </a>
+                <div className="flex flex-col gap-2 mt-3">
+                  {s.submissionUrl.split(",").map((url, idx) => (
+                    <a
+                      key={idx}
+                      href={url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex w-fit rounded-full bg-[var(--accent)] px-4 py-2 text-xs font-black text-[var(--text)] hover:brightness-95 transition-all"
+                    >
+                      Buka jawaban {s.submissionUrl.split(",").length > 1 ? `#${idx + 1}` : ""}
+                    </a>
+                  ))}
+                </div>
                 </div>
 
                 <div className="w-full max-w-lg space-y-3">
                   <div className="grid gap-3 md:grid-cols-3">
                     <label className="block">
-                      <span className="mb-2 block text-xs font-semibold text-[var(--muted)]">Score</span>
+                      <span className="mb-2 block text-xs font-semibold text-[var(--muted)]">Nilai</span>
                       <input
                         type="number"
                         min={0}
@@ -113,7 +124,7 @@ export function AssignmentGrading({ assignmentId, maxScore, submissions }: Props
                       />
                     </label>
                     <label className="block md:col-span-2">
-                      <span className="mb-2 block text-xs font-semibold text-[var(--muted)]">Status</span>
+                      <span className="mb-2 block text-xs font-semibold text-[var(--muted)]">Status Penilaian</span>
                       <select
                         className="w-full rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/15"
                         value={d.status}
@@ -124,15 +135,15 @@ export function AssignmentGrading({ assignmentId, maxScore, submissions }: Props
                           }))
                         }
                       >
-                        <option value="SUBMITTED">SUBMITTED</option>
-                        <option value="GRADED">GRADED</option>
-                        <option value="REVISION_REQUESTED">REVISION_REQUESTED</option>
+                        <option value="SUBMITTED">BELUM DINILAI (DIKIRIM)</option>
+                        <option value="GRADED">SUDAH DINILAI</option>
+                        <option value="REVISION_REQUESTED">PERLU REVISI</option>
                       </select>
                     </label>
                   </div>
 
                   <label className="block">
-                    <span className="mb-2 block text-xs font-semibold text-[var(--muted)]">Feedback</span>
+                    <span className="mb-2 block text-xs font-semibold text-[var(--muted)]">Catatan / Umpan Balik</span>
                     <textarea
                       className="min-h-24 w-full resize-none rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/15"
                       value={d.feedback}

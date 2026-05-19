@@ -168,10 +168,10 @@ export default function PackageDetailPage() {
     </main>
   );
 
-  const tabs: { key: Tab; label: string; icon: string }[] = [
-    { key: "students", label: `Siswa (${activeStudents.length})`, icon: "👥" },
-    { key: "courses", label: `Course (${pkg.packageCourses.length})`, icon: "📚" },
-    { key: "settings", label: "Pengaturan", icon: "⚙️" },
+  const tabs: { key: Tab; label: string }[] = [
+    { key: "students", label: `Siswa (${activeStudents.length})` },
+    { key: "courses", label: `Course (${pkg.packageCourses.length})` },
+    { key: "settings", label: "Pengaturan" },
   ];
 
   return (
@@ -195,10 +195,10 @@ export default function PackageDetailPage() {
             </span>
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
-            <span className="rounded-full bg-[var(--base)] px-3 py-1.5 text-xs font-semibold text-[var(--text)]">💰 {formatPrice(Number(pkg.price))}</span>
-            <span className="rounded-full bg-[var(--base)] px-3 py-1.5 text-xs font-semibold text-[var(--text)]">📖 {pkg.defaultLessonLimit <= 0 ? "Unlimited" : `${pkg.defaultLessonLimit} pertemuan`}</span>
-            <span className="rounded-full bg-[var(--base)] px-3 py-1.5 text-xs font-semibold text-[var(--text)]">👥 {activeStudents.length} siswa</span>
-            <span className="rounded-full bg-[var(--base)] px-3 py-1.5 text-xs font-semibold text-[var(--text)]">📚 {pkg.packageCourses.length} course</span>
+            <span className="rounded-full bg-[var(--base)] px-3 py-1.5 text-xs font-semibold text-[var(--text)]">{formatPrice(Number(pkg.price))}</span>
+            <span className="rounded-full bg-[var(--base)] px-3 py-1.5 text-xs font-semibold text-[var(--text)]">{pkg.defaultLessonLimit <= 0 ? "Unlimited" : `${pkg.defaultLessonLimit} pertemuan`}</span>
+            <span className="rounded-full bg-[var(--base)] px-3 py-1.5 text-xs font-semibold text-[var(--text)]">{activeStudents.length} siswa</span>
+            <span className="rounded-full bg-[var(--base)] px-3 py-1.5 text-xs font-semibold text-[var(--text)]">{pkg.packageCourses.length} course</span>
           </div>
         </div>
 
@@ -207,7 +207,7 @@ export default function PackageDetailPage() {
           {tabs.map(t => (
             <button key={t.key} onClick={() => setTab(t.key)}
               className={`rounded-full px-5 py-2.5 text-sm font-semibold transition-all ${tab === t.key ? "bg-[var(--primary)] text-[var(--primary-ink)] shadow-lg shadow-[var(--primary)]/20" : "bg-[var(--surface)] text-[var(--muted)] border border-[var(--border)] hover:text-[var(--text)]"}`}>
-              {t.icon} {t.label}
+              {t.label}
             </button>
           ))}
         </div>
@@ -228,7 +228,7 @@ export default function PackageDetailPage() {
               </div>
               {activeStudents.length === 0 ? (
                 <div className="text-center py-12">
-                  <div className="text-4xl mb-3">👥</div>
+
                   <p className="font-bold text-[var(--text)]">Belum ada siswa</p>
                   <p className="text-sm text-[var(--muted)] mt-1">Klik tombol di atas untuk menambahkan siswa ke paket ini</p>
                 </div>
@@ -272,7 +272,7 @@ export default function PackageDetailPage() {
               </div>
               {pkg.packageCourses.length === 0 ? (
                 <div className="text-center py-12">
-                  <div className="text-4xl mb-3">📚</div>
+
                   <p className="font-bold text-[var(--text)]">Belum ada course</p>
                   <p className="text-sm text-[var(--muted)] mt-1">Tambahkan course yang termasuk dalam paket ini</p>
                 </div>

@@ -1,10 +1,13 @@
 import { cookies } from "next/headers";
 import { getAuthCookieName, verifyUserJwt } from "@/shared/lib/auth/jwt";
-import BackButton from "@/shared/components/ui/BackButton";
 import Link from "next/link";
 import { AssignmentsClient } from "./assignments-client";
+import TeacherPageLayout from "@/features/users/components/layouts/TeacherPageLayout";
 
-type Course = { id: string; title: string; teacherId: string };
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000";
+
+type Batch = { id: string; name: string; courseId: string; isActive: boolean };
+type Course = { id: string; title: string; teachers: { id: string }[] };
 type Assignment = {
   id: string;
   title: string;
@@ -12,10 +15,13 @@ type Assignment = {
   dueDate: string;
   maxScore: number;
   course: { id: string; title: string };
+  batch?: { id: string; name: string } | null;
+  createdAt: string;
+  updatedAt: string;
 };
 
 async function getCourses(token: string): Promise<Course[]> {
-  const response = await fetch("http://localhost:4000/api/courses", {
+  const response = await fetch(`${BACKEND_URL}/api/courses`, {
     cache: "no-store",
     headers: { cookie: `${getAuthCookieName()}=${token}` },
   });
@@ -24,8 +30,21 @@ async function getCourses(token: string): Promise<Course[]> {
   return data.courses ?? [];
 }
 
+async function getBatches(token: string, courseIds: string[]): Promise<Batch[]> {
+  if (!courseIds.length) return [];
+  const results = await Promise.all(
+    courseIds.map((cId) =>
+      fetch(`${BACKEND_URL}/api/batches?courseId=${cId}`, {
+        cache: "no-store",
+        headers: { cookie: `${getAuthCookieName()}=${token}` },
+      }).then((r) => r.ok ? r.json().then((d: { batches: Batch[] }) => (d.batches ?? []).map(b => ({ ...b, courseId: cId }))) : [])
+    )
+  );
+  return results.flat();
+}
+
 async function getAssignments(token: string): Promise<Assignment[]> {
-  const response = await fetch("http://localhost:4000/api/assignments", {
+  const response = await fetch(`${BACKEND_URL}/api/assignments`, {
     cache: "no-store",
     headers: { cookie: `${getAuthCookieName()}=${token}` },
   });
@@ -48,36 +67,20 @@ export default async function TeacherAssignmentsPage() {
     ? allCourses.filter((c: any) => c.teachers?.some((t: any) => t.id === auth.uid))
     : allCourses;
 
-  return (
-    <main className="min-h-screen bg-[var(--base)] px-6 py-10">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h1 className="text-3xl font-black tracking-tight text-[var(--text)] md:text-4xl">
-              Kelola Assignment
-            </h1>
-            <p className="mt-2 text-sm text-[var(--muted)]">
-              Buat tugas, lihat submission, dan beri nilai.
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <BackButton />
-            <Link
-              href="/teacher"
-              className="inline-flex rounded-full border border-[var(--border)] bg-[var(--base)]/70 px-5 py-3 text-sm font-semibold text-[var(--text)] hover:bg-black/5"
-            >
-              Dashboard
-            </Link>
-          </div>
-        </div>
+  const batches = await getBatches(token, filteredCourses.map((c) => c.id));
 
-        <AssignmentsClient
-          baseUrl="http://localhost:4000"
-          token={token}
-          filteredCourses={filteredCourses.map((c) => ({ id: c.id, title: c.title }))}
-          assignments={assignments}
-        />
-      </div>
-    </main>
+  return (
+    <TeacherPageLayout
+      title="Kelola Tugas"
+      subtitle="Buat tugas per batch, lihat submission, dan beri nilai."
+    >
+      <AssignmentsClient
+        baseUrl={BACKEND_URL}
+        token={token}
+        filteredCourses={filteredCourses.map((c) => ({ id: c.id, title: c.title }))}
+        batches={batches}
+        assignments={assignments}
+      />
+    </TeacherPageLayout>
   );
 }

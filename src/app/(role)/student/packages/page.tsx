@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { FileText, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { Package, BookOpen, Clock, Users, Search, ShoppingBag } from "lucide-react";
 
 interface StorePackage {
   id: string;
@@ -11,6 +10,13 @@ interface StorePackage {
   description: string | null;
   price: number;
   defaultLessonLimit: number;
+  classSchedule?: string | null;
+  batch: {
+    id: string;
+    name: string;
+    maxStudents: number;
+    _count: { enrollments: number };
+  } | null;
   packageCourses: {
     lessonLimit: number | null;
     course: {
@@ -24,148 +30,162 @@ interface StorePackage {
 
 export default function PackageStorePage() {
   const [packages, setPackages] = useState<StorePackage[]>([]);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
-
-  const refreshData = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/packages/store", { credentials: "include" });
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-      const storeData = await res.json().catch(() => ({}));
-      const mapped = (storeData.packages || []).map((p: any) => ({
-        ...p,
-        price: Number(p.price)
-      }));
-      setPackages(mapped);
-    } catch (err) {
-      console.error("Failed to load packages:", err);
-      setPackages([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [loading, setLoading]   = useState(true);
+  const [search, setSearch]     = useState("");
 
   useEffect(() => {
-    refreshData();
+    fetch("/api/packages/store", { credentials: "include" })
+      .then(r => r.json())
+      .then(d => setPackages((d.packages || []).map((p: any) => ({ ...p, price: Number(p.price) }))))
+      .catch(() => setPackages([]))
+      .finally(() => setLoading(false));
   }, []);
 
-  const formatPrice = (p: number) =>
-    new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(p);
+  const fmt = (n: number) =>
+    new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
+
+  const visible = packages.filter(p =>
+    p.name.toLowerCase().includes(search.toLowerCase()) ||
+    (p.description ?? "").toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <main className="min-h-screen bg-[#FDFDFD] pb-20">
-      
-      {/* ── BANNER HERO ────────────────────────────────────────── */}
-      <section className="mx-auto max-w-[1400px] px-4 md:px-10 pt-6">
-        <div className="relative min-h-[400px] md:min-h-0 md:aspect-[3/1] w-full overflow-hidden rounded-[24px] md:rounded-[40px] shadow-2xl shadow-[#1A2E44]/10 flex flex-col justify-center">
-          <img 
-            src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=2000" 
-            alt="Katalog Banner" 
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-          <div className="relative z-10 bg-gradient-to-r from-[#8B0000]/90 via-[#8B0000]/70 to-transparent flex flex-col justify-center px-6 py-12 md:px-24 md:py-0 w-full h-full">
-             <div className="bg-[#E5B54F] self-start px-4 py-1.5 rounded-full mb-4 md:mb-6">
-                <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-[#8B0000]">Katalog Tersedia</span>
-             </div>
-             <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white leading-[1.1] tracking-tighter">PILIH PAKET<br/>SUKSESMU</h1>
-             <p className="text-white/80 text-xs sm:text-sm md:text-xl font-bold mt-4 uppercase tracking-[0.15em] max-w-xs sm:max-w-md md:max-w-xl leading-relaxed">
-               Bergabunglah dengan ribuan siswa yang telah berhasil menembus PTN Impian bersama kurikulum terbaik.
-             </p>
+    <main className="min-h-screen bg-[#F8FAFC] pb-20">
+      <div className="mx-auto max-w-6xl px-6 md:px-10 py-8 space-y-6">
+
+        {/* ── Header ── */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-1">Katalog</p>
+            <h1 className="text-2xl font-bold tracking-tight text-[#0B213F]">Paket Belajar</h1>
+            <p className="mt-1 text-sm text-slate-400">Pilih paket yang sesuai dan mulai perjalanan belajarmu.</p>
+          </div>
+          {/* Search */}
+          <div className="relative w-full sm:w-72">
+            <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300" />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Cari paket..."
+              className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-700 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37]/50 transition-all shadow-sm"
+            />
           </div>
         </div>
-      </section>
 
-      {/* ── CATALOG SECTION ────────────────────────────── */}
-      <section className="mx-auto max-w-[1400px] px-6 md:px-10 mt-16">
-        <div className="flex items-center justify-between mb-10">
-          <h2 className="text-2xl md:text-3xl font-black text-[#1A2E44]">Katalog Paket Belajar</h2>
-        </div>
-
+        {/* ── Content ── */}
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[1, 2, 3, 4].map(i => <div key={i} className="aspect-[3/4] rounded-[32px] bg-slate-100 animate-pulse" />)}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                <div className="h-44 bg-slate-100 animate-pulse" />
+                <div className="p-5 space-y-3">
+                  <div className="h-4 bg-slate-100 rounded animate-pulse w-3/4" />
+                  <div className="h-3 bg-slate-100 rounded animate-pulse w-1/2" />
+                  <div className="h-9 bg-slate-100 rounded-xl animate-pulse mt-4" />
+                </div>
+              </div>
+            ))}
           </div>
-        ) : packages.length === 0 ? (
-          <div className="rounded-[40px] border border-dashed border-slate-200 bg-slate-50 p-20 text-center shadow-sm">
-            <h3 className="text-2xl font-black text-[#1A2E44]">Belum Ada Paket Tersedia</h3>
-            <p className="mt-4 text-slate-400 font-medium max-w-md mx-auto">Tim kami sedang menyiapkan materi terbaik untuk kesuksesan belajar kamu.</p>
+        ) : visible.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-24 text-center bg-white rounded-2xl border border-slate-200">
+            <div className="h-16 w-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
+              <Package size={28} className="text-slate-300" />
+            </div>
+            <p className="text-sm font-bold text-slate-500">
+              {search ? "Paket tidak ditemukan" : "Belum ada paket tersedia"}
+            </p>
+            <p className="text-xs text-slate-400 mt-1">
+              {search ? "Coba kata kunci lain" : "Tim kami sedang menyiapkan materi terbaik."}
+            </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {packages.map((pkg) => {
-              const isFree = pkg.price === 0;
-              const discountPercent = 75;
-              const originalPrice = isFree ? 0 : pkg.price * (100 / (100 - discountPercent));
-              const totalLessons = pkg.packageCourses.reduce((acc, pc) => acc + (pc.lessonLimit ?? pkg.defaultLessonLimit), 0) || 7;
-              
-              // Try to get a thumbnail from the first course, fallback to a nice Unsplash image
-              const fallbackImage = "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=800";
-              const image = pkg.packageCourses[0]?.course.thumbnailUrl || fallbackImage;
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {visible.map(pkg => {
+              const isFree  = pkg.price === 0;
+              const isFull  = (pkg.batch?.maxStudents ?? 0) > 0 &&
+                              (pkg.batch?._count?.enrollments ?? 0) >= (pkg.batch?.maxStudents ?? 0);
+              const thumb   = pkg.packageCourses[0]?.course.thumbnailUrl;
+              const courses = pkg.packageCourses.length;
+              const duration = pkg.defaultLessonLimit > 0 ? `${pkg.defaultLessonLimit} hari` : "Selamanya";
 
               return (
-                <div 
-                  key={pkg.id} 
-                  className="group relative flex flex-col bg-[#FDFDFD] border-2 border-slate-100 rounded-[24px] p-4 sm:p-5 shadow-sm hover:shadow-xl transition-all duration-300"
-                >
-                  
-                  {/* Product Image */}
-                  <div className="relative w-full aspect-[16/9] sm:aspect-[3/2] overflow-hidden rounded-[16px] mb-5">
-                    <img src={image} alt={pkg.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-sm">
-                      <div className="text-[#1A2E44]"><FileText size={14} strokeWidth={3} /></div>
-                      <span className="text-[10px] font-black text-[#1A2E44] uppercase tracking-wider">{totalLessons} Materi</span>
+                <div key={pkg.id}
+                  className="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 overflow-hidden flex flex-col">
+
+                  {/* Thumbnail */}
+                  <div className="relative h-44 bg-[#0B213F] overflow-hidden shrink-0">
+                    {thumb ? (
+                      <img src={thumb} alt={pkg.name}
+                        className="h-full w-full object-cover opacity-85 group-hover:scale-105 transition-transform duration-500" />
+                    ) : (
+                      <div className="h-full flex items-center justify-center">
+                        <Package size={32} className="text-[#D4AF37]/30" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0B213F]/50 to-transparent" />
+
+                    {/* Badges */}
+                    <div className="absolute top-3 left-3 flex gap-2">
+                      {pkg.batch && (
+                        <span className="text-[9px] font-bold uppercase tracking-wider bg-white/90 backdrop-blur text-[#0B213F] px-2.5 py-1 rounded-lg">
+                          {pkg.batch.name}
+                        </span>
+                      )}
+                      {isFull && (
+                        <span className="text-[9px] font-bold uppercase tracking-wider bg-rose-500 text-white px-2.5 py-1 rounded-lg">
+                          Penuh
+                        </span>
+                      )}
                     </div>
                   </div>
 
-                  {/* Content */}
-                  <div className="flex-1 flex flex-col">
-                    <h3 className="text-lg sm:text-xl font-black text-[#1A2E44] leading-tight mb-3 uppercase tracking-tight line-clamp-2">{pkg.name}</h3>
-                    <p className="text-[13px] font-medium text-slate-600 line-clamp-3 mb-6 flex-1 leading-relaxed">
-                      {pkg.description || `Dapatkan akses eksklusif ke program ${pkg.name}.`}
-                    </p>
-                    
-                    {/* Pricing */}
-                    <div className="flex flex-wrap items-end justify-between gap-2 mb-5">
-                      {isFree ? (
-                        <>
-                          <div className="flex items-center gap-2 h-4" />
-                          <p className="text-xl font-black text-emerald-600">Gratis ✨</p>
-                        </>
-                      ) : (
-                        <>
-                          <div className="flex flex-col gap-0.5 shrink-0">
-                             {discountPercent > 0 && (
-                               <div className="flex items-center gap-1.5">
-                                 <span className="bg-[#16a34a] text-white text-[9px] font-black px-1.5 py-0.5 rounded-md tracking-wider">
-                                    {discountPercent}%
-                                 </span>
-                                 <span className="text-[11px] font-bold text-slate-400 line-through italic">{formatPrice(originalPrice)}</span>
-                               </div>
-                             )}
-                          </div>
-                          <p className="text-xl sm:text-2xl font-black text-[#1A2E44] tracking-tight whitespace-nowrap">{formatPrice(pkg.price)}</p>
-                        </>
+                  {/* Body */}
+                  <div className="flex flex-col flex-1 p-5">
+                    <h3 className="text-[13px] font-bold text-[#0B213F] leading-snug line-clamp-2 mb-2">{pkg.name}</h3>
+
+                    {pkg.description && (
+                      <p className="text-[11px] text-slate-400 leading-relaxed line-clamp-2 mb-3">{pkg.description}</p>
+                    )}
+
+                    {/* Meta */}
+                    <div className="flex items-center gap-3 mb-4 mt-auto">
+                      <span className="flex items-center gap-1 text-[10px] font-semibold text-slate-500">
+                        <BookOpen size={11} /> {courses} mapel
+                      </span>
+                      <span className="flex items-center gap-1 text-[10px] font-semibold text-slate-500">
+                        <Clock size={11} /> {duration}
+                      </span>
+                      {pkg.batch && (
+                        <span className="flex items-center gap-1 text-[10px] font-semibold text-slate-500">
+                          <Users size={11} /> {pkg.batch._count.enrollments}/{pkg.batch.maxStudents || "∞"}
+                        </span>
                       )}
                     </div>
 
-                    {/* Action */}
-                    <Link 
-                      href={`/student/packages/${pkg.id}`}
-                      className="w-full py-4 rounded-xl bg-[#1A2E44] text-center text-[13px] font-black text-white hover:bg-[#E5B54F] hover:text-[#1A2E44] transition-all active:scale-[0.98] shadow-md shadow-[#1A2E44]/10"
-                    >
-                      Selengkapnya
-                    </Link>
+                    {/* Price + CTA */}
+                    <div className="flex items-center justify-between gap-3">
+                      <p className={`text-lg font-black tracking-tight ${isFree ? "text-emerald-600" : "text-[#D4AF37]"}`}>
+                        {isFree ? "Gratis" : fmt(pkg.price)}
+                      </p>
+
+                      {isFull ? (
+                        <span className="text-[11px] font-bold text-slate-400 bg-slate-100 px-4 py-2 rounded-xl">
+                          Penuh
+                        </span>
+                      ) : (
+                        <Link href={`/student/packages/${pkg.id}`}
+                          className="flex items-center gap-1.5 bg-[#0B213F] text-white text-[11px] font-bold px-4 py-2 rounded-xl hover:bg-[#D4AF37] hover:text-[#0B213F] transition-all">
+                          <ShoppingBag size={12} /> Detail
+                        </Link>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
             })}
           </div>
         )}
-      </section>
-
+      </div>
     </main>
   );
 }

@@ -82,7 +82,7 @@ export default async function StudentEnrollmentsPage() {
                       <div className="flex flex-col sm:flex-row gap-3">
                          <Link 
                             href={`/student/courses/${e.course.id}`}
-                            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-[#1A2E44] text-white text-[10px] font-black uppercase tracking-widest hover:bg-[#E5B54F] hover:text-[#1A2E44] transition-all shadow-lg shadow-[#1A2E44]/10"
+                            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-[#0B213F] text-white text-[10px] font-black uppercase tracking-widest hover:bg-[#D4AF37] hover:text-[#0B213F] transition-all shadow-lg shadow-[#0B213F]/10"
                          >
                             Mulai Belajar
                          </Link>
